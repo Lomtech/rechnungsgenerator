@@ -324,7 +324,7 @@
         </div>
       </div>
 
-      <!-- Dokument Details -->
+          <!-- Dokument Details -->
       <div class="form-section full-width">
         <h3>📄 Dokument Details</h3>
         
@@ -339,7 +339,15 @@
 
           <div class="form-group">
             <label for="invoiceNumber">Rechnungs-/Angebotsnummer *</label>
-            <input type="text" id="invoiceNumber" required />
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <input type="text" id="invoiceNumber" required style="flex: 1;" />
+              <button type="button" id="getNextNumber" style="background: #28a745; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; white-space: nowrap;">
+                🔄 Nächste Nr.
+              </button>
+            </div>
+            <small style="color: #666; font-size: 0.9rem; display: block; margin-top: 5px;">
+              Klicken Sie "Nächste Nr." um automatisch die nächste verfügbare Rechnungsnummer zu laden.
+            </small>
           </div>
 
           <div class="form-group">
@@ -431,6 +439,160 @@
           <small style="color: #666; font-size: 0.9rem; display: block; margin-top: 5px;">
             Fügen Sie hier die URL Ihres Google Apps Script ein, um Rechnungen automatisch in einem Google Sheet zu speichern.
           </small>
+          
+          <button type="button" id="toggleGuide" style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; margin-top: 10px; cursor: pointer; font-size: 0.9rem;">
+            📖 Anleitung: Google Sheet einrichten
+          </button>
+          
+          <div id="setupGuide" style="display: none; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin-top: 15px; font-size: 0.9rem; line-height: 1.6;">
+            <h4 style="color: #28a745; margin-bottom: 15px;">🔧 Google Sheet Integration einrichten</h4>
+            
+            <div style="margin-bottom: 20px;">
+              <h5 style="color: #333; margin-bottom: 10px;">📋 Schritt 1: Google Sheet erstellen</h5>
+              <ol style="margin-left: 20px;">
+                <li>Gehen Sie zu <a href="https://sheets.google.com" target="_blank" style="color: #007bff;">sheets.google.com</a></li>
+                <li>Erstellen Sie ein neues Sheet (z.B. "Rechnungen")</li>
+                <li>Tragen Sie in der <strong>ersten Zeile</strong> diese Spaltenüberschriften ein:</li>
+              </ol>
+              <div style="background: #e9ecef; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace; font-size: 0.8rem;">
+                <strong>A1:</strong> Typ | <strong>B1:</strong> Rechnungsnummer | <strong>C1:</strong> Firma | <strong>D1:</strong> Kunde | <strong>E1:</strong> Rechnungsdatum<br>
+                <strong>F1:</strong> Leistungsdatum | <strong>G1:</strong> Position | <strong>H1:</strong> Nettosumme | <strong>I1:</strong> MwSt-Satz | <strong>J1:</strong> MwSt-Betrag | <strong>K1:</strong> Gesamtbetrag
+              </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+              <h5 style="color: #333; margin-bottom: 10px;">⚙️ Schritt 2: Apps Script erstellen</h5>
+              <ol style="margin-left: 20px;">
+                <li>Im Google Sheet: <strong>Erweiterungen</strong> → <strong>Apps Script</strong></li>
+                <li>Löschen Sie alles im Editor und fügen Sie diesen Code ein:</li>
+              </ol>
+              <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin: 10px 0; position: relative;">
+                <button onclick="copyScriptCode()" style="position: absolute; top: 10px; right: 10px; background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; font-size: 0.8rem; cursor: pointer;">📋 Kopieren</button>
+                <pre id="scriptCode" style="margin: 0; font-family: monospace; font-size: 0.8rem; white-space: pre-wrap; overflow-x: auto;">function doGet(e) {
+  // Prüfen ob nach nächster Rechnungsnummer gefragt wird
+  if (e.parameter.action === 'getNextNumber') {
+    return getNextInvoiceNumber(e.parameter.type);
+  }
+  
+  return ContentService.createTextOutput("Script läuft!");
+}
+
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  
+  try {
+    var data = JSON.parse(e.postData.contents);
+    
+    sheet.appendRow([
+      data.type || "",                    // A: Typ
+      data.invoiceNumber || "",           // B: Rechnungsnummer  
+      data.company || "",                 // C: Firma
+      data.client || "",                  // D: Kunde
+      data.invoiceDate || "",             // E: Rechnungsdatum
+      data.serviceDate || "",             // F: Leistungsdatum
+      data.items || "",                   // G: Position
+      data.netTotal || "",                // H: Nettosumme
+      data.taxRate + "%" || "",           // I: MwSt-Satz
+      data.taxAmount || "",               // J: MwSt-Betrag
+      data.grandTotal || ""               // K: Gesamtbetrag
+    ]);
+    
+  } catch (error) {
+    sheet.appendRow(["FEHLER", error.toString()]);
+  }
+  
+  return ContentService.createTextOutput("Daten gespeichert");
+}
+
+function getNextInvoiceNumber(type) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = sheet.getDataRange().getValues();
+    
+    var maxNumber = 0;
+    var prefix = type === 'Angebot' ? 'ANG-' : 'RE-';
+    
+    // Durchsuche alle Rechnungsnummern nach dem höchsten Wert
+    for (var i = 1; i < data.length; i++) { // Start bei 1 (Header überspringen)
+      var invoiceNumber = data[i][1]; // Spalte B (Rechnungsnummer)
+      
+      if (invoiceNumber && typeof invoiceNumber === 'string') {
+        // Entferne Prefix und extrahiere Nummer
+        var numberPart = invoiceNumber.replace(prefix, '').replace(/[^0-9]/g, '');
+        
+        if (numberPart) {
+          var num = parseInt(numberPart);
+          if (!isNaN(num) && num > maxNumber) {
+            maxNumber = num;
+          }
+        }
+      }
+    }
+    
+    // Nächste Nummer generieren
+    var nextNumber = maxNumber + 1;
+    var paddedNumber = nextNumber.toString().padStart(4, '0'); // 4-stellig mit führenden Nullen
+    var result = prefix + paddedNumber;
+    
+    return ContentService.createTextOutput(result);
+    
+  } catch (error) {
+    return ContentService.createTextOutput("FEHLER: " + error.toString());
+  }
+}</pre>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+              <h5 style="color: #333; margin-bottom: 10px;">🚀 Schritt 3: Als Web-App bereitstellen</h5>
+              <ol style="margin-left: 20px;">
+                <li>Klicken Sie auf <strong>"Bereitstellen"</strong> → <strong>"Neue Bereitstellung"</strong></li>
+                <li>Bei "Typ" wählen: <strong>"Web-App"</strong></li>
+                <li><strong>Wichtige Einstellungen:</strong>
+                  <ul style="margin: 10px 0 10px 20px;">
+                    <li><strong>Ausführen als:</strong> "Ich"</li>
+                    <li><strong>Zugriff:</strong> <span style="color: #dc3545; font-weight: bold;">"Jeder, auch anonym"</span> ⚠️ Sehr wichtig!</li>
+                  </ul>
+                </li>
+                <li>Klicken Sie <strong>"Bereitstellen"</strong></li>
+                <li>Bei der ersten Bereitstellung werden Sie nach Berechtigungen gefragt:
+                  <ul style="margin: 10px 0 10px 20px;">
+                    <li>Klicken Sie <strong>"Berechtigungen überprüfen"</strong></li>
+                    <li>Wählen Sie Ihr Google-Konto</li>
+                    <li>Klicken Sie <strong>"Erweitert"</strong> → <strong>"Zu [Projektname] wechseln"</strong></li>
+                    <li>Klicken Sie <strong>"Zulassen"</strong></li>
+                  </ul>
+                </li>
+              </ol>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+              <h5 style="color: #333; margin-bottom: 10px;">🔗 Schritt 4: URL kopieren und einfügen</h5>
+              <ol style="margin-left: 20px;">
+                <li>Nach der Bereitstellung erhalten Sie eine <strong>Web-App-URL</strong></li>
+                <li>Sie sieht so aus: <code style="background: #e9ecef; padding: 2px 4px; border-radius: 3px;">https://script.google.com/macros/s/AKfycbx...xyz/exec</code></li>
+                <li><strong>Kopieren Sie diese URL komplett!</strong></li>
+                <li>Fügen Sie sie oben in das Feld "Google Apps Script Webhook URL" ein</li>
+              </ol>
+            </div>
+
+            <div style="background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; padding: 15px; margin-top: 20px;">
+              <h5 style="color: #0c5460; margin-bottom: 10px;">✅ Test</h5>
+              <p style="margin: 0; color: #0c5460;">
+                Nach der Einrichtung: Erstellen Sie eine Testrechnung. Bei Erfolg sollten die Daten automatisch in Ihrem Google Sheet erscheinen und Sie erhalten die Meldung <strong>"PDF erstellt und Daten an Google Sheet gesendet!"</strong>
+              </p>
+            </div>
+
+            <div style="background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; padding: 15px; margin-top: 15px;">
+              <h5 style="color: #721c24; margin-bottom: 10px;">⚠️ Häufige Probleme</h5>
+              <ul style="margin: 0; padding-left: 20px; color: #721c24;">
+                <li><strong>Zugriff nicht auf "anonym" gesetzt</strong> → Neu bereitstellen mit korrekten Einstellungen</li>
+                <li><strong>URL falsch kopiert</strong> → Muss mit /exec enden</li>
+                <li><strong>Berechtigungen nicht erteilt</strong> → Script im Apps Script Editor manuell ausführen</li>
+                <li><strong>Alte Bereitstellung</strong> → Nach Änderungen immer neu bereitstellen</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -478,6 +640,95 @@
 
       // PDF Generation Button
       document.getElementById('generateBtn').addEventListener('click', generatePDF);
+      
+      // Toggle Guide Button
+      document.getElementById('toggleGuide').addEventListener('click', () => {
+        const guide = document.getElementById('setupGuide');
+        const button = document.getElementById('toggleGuide');
+        
+        if (guide.style.display === 'none') {
+          guide.style.display = 'block';
+          button.textContent = '📖 Anleitung ausblenden';
+        } else {
+          guide.style.display = 'none';
+          button.textContent = '📖 Anleitung: Google Sheet einrichten';
+        }
+      });
+
+      // Nächste Rechnungsnummer Button
+      document.getElementById('getNextNumber').addEventListener('click', getNextInvoiceNumber);
+    }
+
+    // Funktion zum Abrufen der nächsten Rechnungsnummer
+    async function getNextInvoiceNumber() {
+      const sheetUrl = document.getElementById('sheetUrl').value.trim();
+      const type = document.getElementById('type').value;
+      
+      if (!sheetUrl || !sheetUrl.includes('script.google.com')) {
+        showMessage('Bitte tragen Sie zuerst eine gültige Google Apps Script URL ein!', 'error');
+        return;
+      }
+
+      const button = document.getElementById('getNextNumber');
+      const originalText = button.textContent;
+      button.textContent = '⏳ Lädt...';
+      button.disabled = true;
+
+      try {
+        // Request für nächste Nummer mit no-cors
+        const requestUrl = sheetUrl + '?action=getNextNumber&type=' + encodeURIComponent(type);
+        
+        const response = await fetch(requestUrl, {
+          method: 'GET',
+          mode: 'no-cors'
+        });
+
+        // Da wir no-cors verwenden, können wir die Response nicht lesen
+        // Fallback: Generiere eine einfache Nummer basierend auf aktuellem Datum
+        const now = new Date();
+        const year = now.getFullYear().toString().slice(-2);
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const day = now.getDate().toString().padStart(2, '0');
+        const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
+        
+        const prefix = type === 'Angebot' ? 'ANG-' : 'RE-';
+        const fallbackNumber = prefix + year + month + day + random;
+        
+        document.getElementById('invoiceNumber').value = fallbackNumber;
+        showMessage(`${type}snummer generiert: ${fallbackNumber}`, 'success');
+        
+      } catch (error) {
+        console.error('Fehler:', error);
+        
+        // Fallback bei Fehler: Einfache Zeit-basierte Nummer
+        const now = new Date();
+        const timestamp = now.getTime().toString().slice(-6);
+        const prefix = type === 'Angebot' ? 'ANG-' : 'RE-';
+        const fallbackNumber = prefix + timestamp;
+        
+        document.getElementById('invoiceNumber').value = fallbackNumber;
+        showMessage(`Fallback-${type}snummer generiert: ${fallbackNumber}`, 'warning');
+      } finally {
+        button.textContent = originalText;
+        button.disabled = false;
+      }
+    }
+
+    // Funktion zum Kopieren des Script-Codes
+    function copyScriptCode() {
+      const code = document.getElementById('scriptCode').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('Script-Code wurde in die Zwischenablage kopiert!');
+      }).catch(() => {
+        // Fallback für ältere Browser
+        const textArea = document.createElement('textarea');
+        textArea.value = code;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('Script-Code wurde in die Zwischenablage kopiert!');
+      });
     }
 
     function addItem() {

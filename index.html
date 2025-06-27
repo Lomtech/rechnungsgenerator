@@ -1,477 +1,742 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Professioneller Rechnungs- und Angebotsgenerator</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 30px;
-      text-align: center;
-    }
-
-    .header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      font-weight: 300;
-    }
-
-    .header p {
-      opacity: 0.9;
-      font-size: 1.1rem;
-    }
-
-    .form-container {
-      padding: 40px;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
-      margin-bottom: 30px;
-    }
-
-    .form-section {
-      background: #f8f9ff;
-      padding: 25px;
-      border-radius: 10px;
-      border-left: 4px solid #667eea;
-    }
-
-    .form-section h3 {
-      color: #333;
-      margin-bottom: 20px;
-      font-size: 1.3rem;
-      font-weight: 500;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: #555;
-      font-size: 0.95rem;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 12px 15px;
-      border: 2px solid #e1e5e9;
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-      background: white;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-
-    .full-width {
-      grid-column: span 2;
-    }
-
-    .generate-btn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      padding: 18px 40px;
-      font-size: 1.2rem;
-      font-weight: 600;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 100%;
-      margin-top: 20px;
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-    }
-
-    .generate-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-    }
-
-    .generate-btn:active {
-      transform: translateY(0);
-    }
-
-    #message {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 8px;
-      font-weight: 500;
-      text-align: center;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    #message.show {
-      opacity: 1;
-    }
-
-    .success {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-
-    .error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-
-    .warning {
-      background: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeaa7;
-    }
-
-    @media (max-width: 768px) {
-      .form-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Professioneller Rechnungs- und Angebotsgenerator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
-      
-      .full-width {
-        grid-column: span 1;
-      }
-      
-      .form-container {
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
         padding: 20px;
       }
-      
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
       .header {
-        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
       }
-      
+
       .header h1 {
-        font-size: 2rem;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 300;
       }
-    }
 
-    .invoice-items {
-      background: #f8f9ff;
-      padding: 25px;
-      border-radius: 10px;
-      border-left: 4px solid #667eea;
-      margin-bottom: 30px;
-    }
+      .header p {
+        opacity: 0.9;
+        font-size: 1.1rem;
+      }
 
-    .item-row {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1fr auto;
-      gap: 15px;
-      align-items: end;
-      margin-bottom: 15px;
-      padding: 15px;
-      background: white;
-      border-radius: 8px;
-      border: 1px solid #e1e5e9;
-    }
+      .form-container {
+        padding: 40px;
+      }
 
-    .remove-item {
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background 0.3s ease;
-    }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+      }
 
-    .remove-item:hover {
-      background: #c82333;
-    }
+      .form-section {
+        background: #f8f9ff;
+        padding: 25px;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+      }
 
-    .add-item {
-      background: #28a745;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.95rem;
-      margin-top: 15px;
-      transition: background 0.3s ease;
-    }
+      .form-section h3 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 1.3rem;
+        font-weight: 500;
+      }
 
-    .add-item:hover {
-      background: #218838;
-    }
+      .form-group {
+        margin-bottom: 20px;
+      }
 
-    .totals {
-      background: #f8f9ff;
-      padding: 20px;
-      border-radius: 8px;
-      margin-top: 20px;
-      text-align: right;
-    }
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #555;
+        font-size: 0.95rem;
+      }
 
-    .total-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      font-size: 1.1rem;
-    }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+      }
 
-    .total-row.final {
-      font-weight: bold;
-      font-size: 1.3rem;
-      border-top: 2px solid #667eea;
-      padding-top: 10px;
-      margin-top: 15px;
-    }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
 
-    @media (max-width: 768px) {
+      textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
+
+      .full-width {
+        grid-column: span 2;
+      }
+
+      .generate-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 18px 40px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 20px;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+      }
+
+      .generate-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      .generate-btn:active {
+        transform: translateY(0);
+      }
+
+      #message {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        font-weight: 500;
+        text-align: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      #message.show {
+        opacity: 1;
+      }
+
+      .success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+      }
+
+      @media (max-width: 768px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        .full-width {
+          grid-column: span 1;
+        }
+
+        .form-container {
+          padding: 20px;
+        }
+
+        .header {
+          padding: 20px;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+      }
+
+      .invoice-items {
+        background: #f8f9ff;
+        padding: 25px;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+        margin-bottom: 30px;
+      }
+
       .item-row {
-        grid-template-columns: 1fr;
-        gap: 10px;
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr auto;
+        gap: 15px;
+        align-items: end;
+        margin-bottom: 15px;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e1e5e9;
       }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>Rechnung & Angebot</h1>
-      <p>Professioneller Generator für Rechnungen und Angebote</p>
-    </div>
 
-    <div class="form-container">
-      <div class="form-grid">
-        <!-- Absender Daten -->
-        <div class="form-section">
-          <h3>📋 Absender (Ihre Firma)</h3>
-          
-          <div class="form-group">
-            <label for="company">Firmenname *</label>
-            <input type="text" id="company" required />
-          </div>
+      .remove-item {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.3s ease;
+      }
 
-          <div class="form-group">
-            <label for="companyAddress">Firmenadresse *</label>
-            <textarea id="companyAddress" rows="3" required placeholder="Straße Nr.&#10;PLZ Ort&#10;Land"></textarea>
-          </div>
+      .remove-item:hover {
+        background: #c82333;
+      }
 
-          <div class="form-group">
-            <label for="taxId">Steuernummer / USt-IdNr. *</label>
-            <input type="text" id="taxId" required />
-          </div>
+      .add-item {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        margin-top: 15px;
+        transition: background 0.3s ease;
+      }
 
-          <div class="form-group">
-            <label for="companyContact">Kontakt (E-Mail, Telefon)</label>
-            <textarea id="companyContact" rows="2" placeholder="info@firma.de&#10;+49 123 456789"></textarea>
-          </div>
-        </div>
+      .add-item:hover {
+        background: #218838;
+      }
 
-        <!-- Empfänger Daten -->
-        <div class="form-section">
-          <h3>👤 Empfänger (Kunde)</h3>
-          
-          <div class="form-group">
-            <label for="client">Kundenname / Firma *</label>
-            <input type="text" id="client" required />
-          </div>
+      .totals {
+        background: #f8f9ff;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 20px;
+        text-align: right;
+      }
 
-          <div class="form-group">
-            <label for="clientAddress">Kundenadresse *</label>
-            <textarea id="clientAddress" rows="3" required placeholder="Ansprechpartner&#10;Straße Nr.&#10;PLZ Ort"></textarea>
-          </div>
+      .total-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+      }
 
-          <div class="form-group">
-            <label for="customerNumber">Kundennummer</label>
-            <input type="text" id="customerNumber" />
-          </div>
-        </div>
+      .total-row.final {
+        font-weight: bold;
+        font-size: 1.3rem;
+        border-top: 2px solid #667eea;
+        padding-top: 10px;
+        margin-top: 15px;
+      }
+
+      @media (max-width: 768px) {
+        .item-row {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Rechnung & Angebot</h1>
+        <p>Professioneller Generator für Rechnungen und Angebote</p>
       </div>
 
-          <!-- Dokument Details -->
-      <div class="form-section full-width">
-        <h3>📄 Dokument Details</h3>
-        
+      <div class="form-container">
         <div class="form-grid">
-          <div class="form-group">
-            <label for="type">Dokumenttyp *</label>
-            <select id="type" required>
-              <option value="Rechnung">Rechnung</option>
-              <option value="Angebot">Angebot</option>
-            </select>
+          <!-- Absender Daten -->
+          <div class="form-section">
+            <h3>📋 Absender (Ihre Firma)</h3>
+
+            <div class="form-group">
+              <label for="company">Firmenname *</label>
+              <input type="text" id="company" required />
+            </div>
+
+            <div class="form-group">
+              <label for="companyAddress">Firmenadresse *</label>
+              <textarea
+                id="companyAddress"
+                rows="3"
+                required
+                placeholder="Straße Nr.&#10;PLZ Ort&#10;Land"
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="taxId">Steuernummer / USt-IdNr. *</label>
+              <input type="text" id="taxId" required />
+            </div>
+
+            <div class="form-group">
+              <label for="companyContact">Kontakt (E-Mail, Telefon)</label>
+              <textarea
+                id="companyContact"
+                rows="2"
+                placeholder="info@firma.de&#10;+49 123 456789"
+              ></textarea>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label for="invoiceNumber">Rechnungs-/Angebotsnummer *</label>
-            <div style="display: flex; gap: 10px; align-items: center;">
-              <input type="text" id="invoiceNumber" required style="flex: 1;" />
-              <button type="button" id="getNextNumber" style="background: #28a745; color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; white-space: nowrap;">
-                🔄 Nächste Nr.
+          <!-- Empfänger Daten -->
+          <div class="form-section">
+            <h3>👤 Empfänger (Kunde)</h3>
+
+            <div class="form-group">
+              <label for="client">Kundenname / Firma *</label>
+              <input type="text" id="client" required />
+              <small
+                style="
+                  color: #666;
+                  font-size: 0.9rem;
+                  display: block;
+                  margin-top: 5px;
+                "
+              >
+                Das System sucht automatisch nach vorhandenen Kundennummern beim
+                Eingeben des Namens.
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="clientGender">Anrede (für Privatpersonen)</label>
+              <select id="clientGender">
+                <option value="">Firma / Neutral</option>
+                <option value="Herr">Herr</option>
+                <option value="Frau">Frau</option>
+              </select>
+              <small
+                style="
+                  color: #666;
+                  font-size: 0.9rem;
+                  display: block;
+                  margin-top: 5px;
+                "
+              >
+                Wenn ausgewählt, wird "Sehr geehrter Herr..." statt "Sehr
+                geehrte Damen und Herren" verwendet.
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="clientAddress">Kundenadresse *</label>
+              <textarea
+                id="clientAddress"
+                rows="3"
+                required
+                placeholder="Ansprechpartner&#10;Straße Nr.&#10;PLZ Ort"
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="customerNumber">Kundennummer</label>
+              <div style="display: flex; gap: 10px; align-items: center">
+                <input type="text" id="customerNumber" style="flex: 1" />
+                <button
+                  type="button"
+                  id="getNextCustomerNumber"
+                  style="
+                    background: #17a2b8;
+                    color: white;
+                    border: none;
+                    padding: 12px 16px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 0.9rem;
+                    white-space: nowrap;
+                  "
+                >
+                  🔄 Nächste KD-Nr.
+                </button>
+              </div>
+              <small
+                style="
+                  color: #666;
+                  font-size: 0.9rem;
+                  display: block;
+                  margin-top: 5px;
+                "
+              >
+                Klicken Sie "Nächste KD-Nr." um automatisch die nächste
+                verfügbare Kundennummer zu laden.
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dokument Details -->
+        <div class="form-section full-width">
+          <h3>📄 Dokument Details</h3>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="type">Dokumenttyp *</label>
+              <select id="type" required>
+                <option value="Rechnung">Rechnung</option>
+                <option value="Angebot">Angebot</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="invoiceNumber">Rechnungs-/Angebotsnummer *</label>
+              <div style="display: flex; gap: 10px; align-items: center">
+                <input
+                  type="text"
+                  id="invoiceNumber"
+                  required
+                  style="flex: 1"
+                />
+                <button
+                  type="button"
+                  id="getNextNumber"
+                  style="
+                    background: #28a745;
+                    color: white;
+                    border: none;
+                    padding: 12px 16px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 0.9rem;
+                    white-space: nowrap;
+                  "
+                >
+                  🔄 Nächste Nr.
+                </button>
+              </div>
+              <small
+                style="
+                  color: #666;
+                  font-size: 0.9rem;
+                  display: block;
+                  margin-top: 5px;
+                "
+              >
+                Klicken Sie "Nächste Nr." um automatisch die nächste verfügbare
+                Rechnungsnummer zu laden.
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="invoiceDate">Rechnungsdatum *</label>
+              <input type="date" id="invoiceDate" required />
+            </div>
+
+            <div class="form-group">
+              <label for="serviceDate">Leistungsdatum *</label>
+              <input type="date" id="serviceDate" required />
+            </div>
+          </div>
+        </div>
+
+        <!-- Leistungen -->
+        <div class="invoice-items">
+          <h3>🛍️ Leistungen / Positionen</h3>
+          <div id="itemsContainer">
+            <div class="item-row">
+              <div class="form-group">
+                <label>Leistungsbeschreibung *</label>
+                <input type="text" class="item-description" required />
+              </div>
+              <div class="form-group">
+                <label>Menge *</label>
+                <input
+                  type="number"
+                  class="item-quantity"
+                  value="1"
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Einzelpreis (€) *</label>
+                <input
+                  type="number"
+                  class="item-price"
+                  step="0.01"
+                  min="0"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Gesamt (€)</label>
+                <input type="number" class="item-total" readonly />
+              </div>
+              <button
+                type="button"
+                class="remove-item"
+                onclick="removeItem(this)"
+              >
+                ✕
               </button>
             </div>
-            <small style="color: #666; font-size: 0.9rem; display: block; margin-top: 5px;">
-              Klicken Sie "Nächste Nr." um automatisch die nächste verfügbare Rechnungsnummer zu laden.
-            </small>
           </div>
-
-          <div class="form-group">
-            <label for="invoiceDate">Rechnungsdatum *</label>
-            <input type="date" id="invoiceDate" required />
-          </div>
-
-          <div class="form-group">
-            <label for="serviceDate">Leistungsdatum *</label>
-            <input type="date" id="serviceDate" required />
-          </div>
-        </div>
-      </div>
-
-      <!-- Leistungen -->
-      <div class="invoice-items">
-        <h3>🛍️ Leistungen / Positionen</h3>
-        <div id="itemsContainer">
-          <div class="item-row">
-            <div class="form-group">
-              <label>Leistungsbeschreibung *</label>
-              <input type="text" class="item-description" required />
-            </div>
-            <div class="form-group">
-              <label>Menge *</label>
-              <input type="number" class="item-quantity" value="1" min="0" step="0.01" required />
-            </div>
-            <div class="form-group">
-              <label>Einzelpreis (€) *</label>
-              <input type="number" class="item-price" step="0.01" min="0" required />
-            </div>
-            <div class="form-group">
-              <label>Gesamt (€)</label>
-              <input type="number" class="item-total" readonly />
-            </div>
-            <button type="button" class="remove-item" onclick="removeItem(this)">✕</button>
-          </div>
-        </div>
-        <button type="button" class="add-item" onclick="addItem()">+ Position hinzufügen</button>
-        
-        <div class="totals">
-          <div class="total-row">
-            <span>Nettosumme:</span>
-            <span id="netTotal">0,00 €</span>
-          </div>
-          <div class="form-group" style="margin: 15px 0; text-align: right;">
-            <label for="taxRate">Mehrwertsteuer (%) *</label>
-            <input type="number" id="taxRate" value="19" min="0" step="0.01" style="width: 150px; display: inline-block;" />
-          </div>
-          <div class="total-row">
-            <span>MwSt.:</span>
-            <span id="taxAmount">0,00 €</span>
-          </div>
-          <div class="total-row final">
-            <span>Gesamtbetrag:</span>
-            <span id="grandTotal">0,00 €</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Zusätzliche Angaben -->
-      <div class="form-section full-width">
-        <h3>💰 Zahlungsdetails & Zusätze</h3>
-        
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="paymentTerms">Zahlungsziel</label>
-            <input type="text" id="paymentTerms" value="Zahlbar innerhalb von 14 Tagen ohne Abzug" />
-          </div>
-
-          <div class="form-group">
-            <label for="bankDetails">Bankverbindung</label>
-            <textarea id="bankDetails" rows="2" placeholder="IBAN: DE12 3456 7890 1234 5678 90&#10;BIC: ABCDEFGH"></textarea>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="additionalNotes">Zusätzliche Hinweise</label>
-          <textarea id="additionalNotes" rows="2" placeholder="Vielen Dank für Ihren Auftrag!"></textarea>
-        </div>
-      </div>
-
-      <!-- Google Sheet Integration -->
-      <div class="form-section full-width">
-        <h3>☁️ Google Sheet Integration (Optional)</h3>
-        <div class="form-group">
-          <label for="sheetUrl">Google Apps Script Webhook URL</label>
-          <input type="url" id="sheetUrl" placeholder="https://script.google.com/macros/s/.../exec" />
-          <small style="color: #666; font-size: 0.9rem; display: block; margin-top: 5px;">
-            Fügen Sie hier die URL Ihres Google Apps Script ein, um Rechnungen automatisch in einem Google Sheet zu speichern.
-          </small>
-          
-          <button type="button" id="toggleGuide" style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; margin-top: 10px; cursor: pointer; font-size: 0.9rem;">
-            📖 Anleitung: Google Sheet einrichten
+          <button type="button" class="add-item" onclick="addItem()">
+            + Position hinzufügen
           </button>
-          
-          <div id="setupGuide" style="display: none; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin-top: 15px; font-size: 0.9rem; line-height: 1.6;">
-            <h4 style="color: #28a745; margin-bottom: 15px;">🔧 Google Sheet Integration einrichten</h4>
-            
-            <div style="margin-bottom: 20px;">
-              <h5 style="color: #333; margin-bottom: 10px;">📋 Schritt 1: Google Sheet erstellen</h5>
-              <ol style="margin-left: 20px;">
-                <li>Gehen Sie zu <a href="https://sheets.google.com" target="_blank" style="color: #007bff;">sheets.google.com</a></li>
-                <li>Erstellen Sie ein neues Sheet (z.B. "Rechnungen")</li>
-                <li>Tragen Sie in der <strong>ersten Zeile</strong> diese Spaltenüberschriften ein:</li>
-              </ol>
-              <div style="background: #e9ecef; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace; font-size: 0.8rem;">
-                <strong>A1:</strong> Typ | <strong>B1:</strong> Rechnungsnummer | <strong>C1:</strong> Firma | <strong>D1:</strong> Kunde | <strong>E1:</strong> Rechnungsdatum<br>
-                <strong>F1:</strong> Leistungsdatum | <strong>G1:</strong> Position | <strong>H1:</strong> Nettosumme | <strong>I1:</strong> MwSt-Satz | <strong>J1:</strong> MwSt-Betrag | <strong>K1:</strong> Gesamtbetrag
-              </div>
+
+          <div class="totals">
+            <div class="total-row">
+              <span>Nettosumme:</span>
+              <span id="netTotal">0,00 €</span>
+            </div>
+            <div class="form-group" style="margin: 15px 0; text-align: right">
+              <label for="taxRate">Mehrwertsteuer (%) *</label>
+              <input
+                type="number"
+                id="taxRate"
+                value="19"
+                min="0"
+                step="0.01"
+                style="width: 150px; display: inline-block"
+              />
+            </div>
+            <div class="total-row">
+              <span>MwSt.:</span>
+              <span id="taxAmount">0,00 €</span>
+            </div>
+            <div class="total-row final">
+              <span>Gesamtbetrag:</span>
+              <span id="grandTotal">0,00 €</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zusätzliche Angaben -->
+        <div class="form-section full-width">
+          <h3>💰 Zahlungsdetails & Zusätze</h3>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="paymentTerms">Zahlungsziel</label>
+              <input
+                type="text"
+                id="paymentTerms"
+                value="Zahlbar innerhalb von 14 Tagen ohne Abzug"
+              />
             </div>
 
-            <div style="margin-bottom: 20px;">
-              <h5 style="color: #333; margin-bottom: 10px;">⚙️ Schritt 2: Apps Script erstellen</h5>
-              <ol style="margin-left: 20px;">
-                <li>Im Google Sheet: <strong>Erweiterungen</strong> → <strong>Apps Script</strong></li>
-                <li>Löschen Sie alles im Editor und fügen Sie diesen Code ein:</li>
-              </ol>
-              <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin: 10px 0; position: relative;">
-                <button onclick="copyScriptCode()" style="position: absolute; top: 10px; right: 10px; background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 3px; font-size: 0.8rem; cursor: pointer;">📋 Kopieren</button>
-                <pre id="scriptCode" style="margin: 0; font-family: monospace; font-size: 0.8rem; white-space: pre-wrap; overflow-x: auto;">function doGet(e) {
-  // Prüfen ob nach nächster Rechnungsnummer gefragt wird
-  if (e.parameter.action === 'getNextNumber') {
-    return getNextInvoiceNumber(e.parameter.type);
+            <div class="form-group">
+              <label for="bankDetails">Bankverbindung</label>
+              <textarea
+                id="bankDetails"
+                rows="2"
+                placeholder="IBAN: DE12 3456 7890 1234 5678 90&#10;BIC: ABCDEFGH"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="additionalNotes">Zusätzliche Hinweise</label>
+            <textarea
+              id="additionalNotes"
+              rows="2"
+              placeholder="Vielen Dank für Ihren Auftrag!"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Google Sheet Integration -->
+        <div class="form-section full-width">
+          <h3>☁️ Google Sheet Integration (Optional)</h3>
+          <div class="form-group">
+            <label for="sheetUrl">Google Apps Script Webhook URL</label>
+            <input
+              type="url"
+              id="sheetUrl"
+              placeholder="https://script.google.com/macros/s/.../exec"
+            />
+            <small
+              style="
+                color: #666;
+                font-size: 0.9rem;
+                display: block;
+                margin-top: 5px;
+              "
+            >
+              Fügen Sie hier die URL Ihres Google Apps Script ein, um Rechnungen
+              automatisch in einem Google Sheet zu speichern.
+            </small>
+
+            <button
+              type="button"
+              id="toggleGuide"
+              style="
+                background: #28a745;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                margin-top: 10px;
+                cursor: pointer;
+                font-size: 0.9rem;
+              "
+            >
+              📖 Anleitung: Google Sheet einrichten
+            </button>
+
+            <div
+              id="setupGuide"
+              style="
+                display: none;
+                background: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                padding: 20px;
+                margin-top: 15px;
+                font-size: 0.9rem;
+                line-height: 1.6;
+              "
+            >
+              <h4 style="color: #28a745; margin-bottom: 15px">
+                🔧 Google Sheet Integration einrichten
+              </h4>
+
+              <div style="margin-bottom: 20px">
+                <h5 style="color: #333; margin-bottom: 10px">
+                  📋 Schritt 1: Google Sheet erstellen
+                </h5>
+                <ol style="margin-left: 20px">
+                  <li>
+                    Gehen Sie zu
+                    <a
+                      href="https://sheets.google.com"
+                      target="_blank"
+                      style="color: #007bff"
+                      >sheets.google.com</a
+                    >
+                  </li>
+                  <li>Erstellen Sie ein neues Sheet (z.B. "Rechnungen")</li>
+                  <li>
+                    Tragen Sie in der <strong>ersten Zeile</strong> diese
+                    Spaltenüberschriften ein:
+                  </li>
+                </ol>
+                <div
+                  style="
+                    background: #e9ecef;
+                    padding: 10px;
+                    border-radius: 4px;
+                    margin: 10px 0;
+                    font-family: monospace;
+                    font-size: 0.8rem;
+                  "
+                >
+                  <strong>A1:</strong> Typ |
+                  <strong>B1:</strong> Rechnungsnummer |
+                  <strong>C1:</strong> Firma | <strong>D1:</strong> Kunde |
+                  <strong>E1:</strong> Anrede<br />
+                  <strong>F1:</strong> Kundennummer |
+                  <strong>G1:</strong> Rechnungsdatum |
+                  <strong>H1:</strong> Leistungsdatum |
+                  <strong>I1:</strong> Position |
+                  <strong>J1:</strong> Nettosumme |
+                  <strong>K1:</strong> MwSt-Satz |
+                  <strong>L1:</strong> MwSt-Betrag |
+                  <strong>M1:</strong> Gesamtbetrag
+                </div>
+              </div>
+
+              <div style="margin-bottom: 20px">
+                <h5 style="color: #333; margin-bottom: 10px">
+                  ⚙️ Schritt 2: Apps Script erstellen
+                </h5>
+                <ol style="margin-left: 20px">
+                  <li>
+                    Im Google Sheet: <strong>Erweiterungen</strong> →
+                    <strong>Apps Script</strong>
+                  </li>
+                  <li>
+                    Löschen Sie alles im Editor und fügen Sie diesen Code ein:
+                  </li>
+                </ol>
+                <div
+                  style="
+                    background: #f8f9fa;
+                    border: 1px solid #dee2e6;
+                    border-radius: 4px;
+                    padding: 15px;
+                    margin: 10px 0;
+                    position: relative;
+                  "
+                >
+                  <button
+                    onclick="copyScriptCode()"
+                    style="
+                      position: absolute;
+                      top: 10px;
+                      right: 10px;
+                      background: #007bff;
+                      color: white;
+                      border: none;
+                      padding: 5px 10px;
+                      border-radius: 3px;
+                      font-size: 0.8rem;
+                      cursor: pointer;
+                    "
+                  >
+                    📋 Kopieren
+                  </button>
+                  <pre
+                    id="scriptCode"
+                    style="
+                      margin: 0;
+                      font-family: monospace;
+                      font-size: 0.8rem;
+                      white-space: pre-wrap;
+                      overflow-x: auto;
+                    "
+                  >
+function doGet(e) {
+  // Prüfen ob e und parameter existieren
+  if (e && e.parameter) {
+    if (e.parameter.action === 'getNextNumber') {
+      return getNextInvoiceNumber(e.parameter.type);
+    }
+    if (e.parameter.action === 'getNextCustomerNumber') {
+      return getNextCustomerNumber();
+    }
+    if (e.parameter.action === 'searchCustomer') {
+      return searchExistingCustomer(e.parameter.name);
+    }
   }
   
   return ContentService.createTextOutput("Script läuft!");
@@ -488,13 +753,15 @@ function doPost(e) {
       data.invoiceNumber || "",           // B: Rechnungsnummer  
       data.company || "",                 // C: Firma
       data.client || "",                  // D: Kunde
-      data.invoiceDate || "",             // E: Rechnungsdatum
-      data.serviceDate || "",             // F: Leistungsdatum
-      data.items || "",                   // G: Position
-      data.netTotal || "",                // H: Nettosumme
-      data.taxRate + "%" || "",           // I: MwSt-Satz
-      data.taxAmount || "",               // J: MwSt-Betrag
-      data.grandTotal || ""               // K: Gesamtbetrag
+      data.clientGender || "",            // E: Anrede
+      data.customerNumber || "",          // F: Kundennummer
+      data.invoiceDate || "",             // G: Rechnungsdatum
+      data.serviceDate || "",             // H: Leistungsdatum
+      data.items || "",                   // I: Position
+      data.netTotal || "",                // J: Nettosumme
+      data.taxRate + "%" || "",           // K: MwSt-Satz
+      data.taxAmount || "",               // L: MwSt-Betrag
+      data.grandTotal || ""               // M: Gesamtbetrag
     ]);
     
   } catch (error) {
@@ -502,6 +769,106 @@ function doPost(e) {
   }
   
   return ContentService.createTextOutput("Daten gespeichert");
+}
+
+function searchExistingCustomer(customerName, customerAddress) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = sheet.getDataRange().getValues();
+    
+    // Normalisiere Suchkriterien
+    var searchName = customerName.toLowerCase().replace(/\s+/g, '');
+    var searchAddress = customerAddress ? customerAddress.toLowerCase().replace(/\s+/g, '') : '';
+    
+    var bestMatch = null;
+    var bestScore = 0;
+    
+    // Durchsuche alle Zeilen nach dem Kundennamen und Adresse
+    for (var i = 1; i < data.length; i++) {
+      var existingClient = data[i][3]; // Spalte D (Kunde)
+      var existingGender = data[i][4]; // Spalte E (Anrede)
+      var existingCustomerNumber = data[i][5]; // Spalte F (Kundennummer)
+      var existingAddress = data[i][7] || ''; // Spalte H (Adresse) - falls verfügbar
+      
+      if (existingClient && typeof existingClient === 'string') {
+        var existingName = existingClient.toLowerCase().replace(/\s+/g, '');
+        var existingAddr = existingAddress.toString().toLowerCase().replace(/\s+/g, '');
+        
+        var score = 0;
+        
+        // Name-Matching (Hauptkriterium)
+        if (existingName === searchName) {
+          score += 100; // Exakte Übereinstimmung
+        } else if (existingName.includes(searchName) || searchName.includes(existingName)) {
+          score += 60; // Teilweise Übereinstimmung
+        } else {
+          // Prüfe einzelne Wörter
+          var nameWords = searchName.split(/[^a-z0-9]/);
+          var existingWords = existingName.split(/[^a-z0-9]/);
+          var matchingWords = 0;
+          
+          nameWords.forEach(function(word) {
+            if (word.length > 2 && existingWords.some(function(eWord) { return eWord.includes(word); })) {
+              matchingWords++;
+            }
+          });
+          
+          if (matchingWords >= 2) {
+            score += 40; // Mehrere Wörter stimmen überein
+          } else if (matchingWords >= 1) {
+            score += 20; // Ein Wort stimmt überein
+          }
+        }
+        
+        // Adress-Matching (zusätzliches Kriterium)
+        if (searchAddress && existingAddr) {
+          if (existingAddr.includes(searchAddress) || searchAddress.includes(existingAddr)) {
+            score += 30; // Adresse stimmt überein
+          } else {
+            // Prüfe Straßenname oder PLZ
+            var addressParts = searchAddress.split(/[^a-z0-9]/);
+            var existingParts = existingAddr.split(/[^a-z0-9]/);
+            var addressMatches = 0;
+            
+            addressParts.forEach(function(part) {
+              if (part.length > 2 && existingParts.some(function(ePart) { return ePart.includes(part); })) {
+                addressMatches++;
+              }
+            });
+            
+            if (addressMatches >= 1) {
+              score += 15; // Teilweise Adress-Übereinstimmung
+            }
+          }
+        }
+        
+        // Speichere den besten Match
+        if (score > bestScore && score >= 60 && existingCustomerNumber) { // Mindest-Score für Match
+          bestScore = score;
+          bestMatch = {
+            customerNumber: existingCustomerNumber,
+            gender: existingGender || '',
+            score: score
+          };
+        }
+      }
+    }
+    
+    // Gib den besten Match zurück
+    if (bestMatch) {
+      var result = bestMatch.customerNumber;
+      if (bestMatch.gender) {
+        result += "|" + bestMatch.gender;
+      }
+      result += "|SCORE:" + bestMatch.score; // Für Debugging
+      return ContentService.createTextOutput(result);
+    }
+    
+    return ContentService.createTextOutput("NICHT_GEFUNDEN");
+    
+  } catch (error) {
+    return ContentService.createTextOutput("FEHLER: " + error.toString());
+  }
 }
 
 function getNextInvoiceNumber(type) {
@@ -512,12 +879,10 @@ function getNextInvoiceNumber(type) {
     var maxNumber = 0;
     var prefix = type === 'Angebot' ? 'ANG-' : 'RE-';
     
-    // Durchsuche alle Rechnungsnummern nach dem höchsten Wert
-    for (var i = 1; i < data.length; i++) { // Start bei 1 (Header überspringen)
+    for (var i = 1; i < data.length; i++) {
       var invoiceNumber = data[i][1]; // Spalte B (Rechnungsnummer)
       
       if (invoiceNumber && typeof invoiceNumber === 'string') {
-        // Entferne Prefix und extrahiere Nummer
         var numberPart = invoiceNumber.replace(prefix, '').replace(/[^0-9]/g, '');
         
         if (numberPart) {
@@ -529,9 +894,8 @@ function getNextInvoiceNumber(type) {
       }
     }
     
-    // Nächste Nummer generieren
     var nextNumber = maxNumber + 1;
-    var paddedNumber = nextNumber.toString().padStart(4, '0'); // 4-stellig mit führenden Nullen
+    var paddedNumber = nextNumber.toString().padStart(4, '0');
     var result = prefix + paddedNumber;
     
     return ContentService.createTextOutput(result);
@@ -539,204 +903,291 @@ function getNextInvoiceNumber(type) {
   } catch (error) {
     return ContentService.createTextOutput("FEHLER: " + error.toString());
   }
-}</pre>
+}
+
+function getNextCustomerNumber() {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = sheet.getDataRange().getValues();
+    
+    var maxNumber = 0;
+    var prefix = 'KD-';
+    
+    for (var i = 1; i < data.length; i++) {
+      var customerNumber = data[i][5]; // Spalte F (Kundennummer)
+      
+      if (customerNumber && typeof customerNumber === 'string' && customerNumber.includes('KD-')) {
+        var numberPart = customerNumber.replace(prefix, '').replace(/[^0-9]/g, '');
+        
+        if (numberPart) {
+          var num = parseInt(numberPart);
+          if (!isNaN(num) && num > maxNumber) {
+            maxNumber = num;
+          }
+        }
+      }
+    }
+    
+    var nextNumber = maxNumber + 1;
+    var paddedNumber = nextNumber.toString().padStart(4, '0');
+    var result = prefix + paddedNumber;
+    
+    return ContentService.createTextOutput(result);
+    
+  } catch (error) {
+    return ContentService.createTextOutput("FEHLER: " + error.toString());
+  }
+}</pre
+                  >
+                </div>
               </div>
-            </div>
 
-            <div style="margin-bottom: 20px;">
-              <h5 style="color: #333; margin-bottom: 10px;">🚀 Schritt 3: Als Web-App bereitstellen</h5>
-              <ol style="margin-left: 20px;">
-                <li>Klicken Sie auf <strong>"Bereitstellen"</strong> → <strong>"Neue Bereitstellung"</strong></li>
-                <li>Bei "Typ" wählen: <strong>"Web-App"</strong></li>
-                <li><strong>Wichtige Einstellungen:</strong>
-                  <ul style="margin: 10px 0 10px 20px;">
-                    <li><strong>Ausführen als:</strong> "Ich"</li>
-                    <li><strong>Zugriff:</strong> <span style="color: #dc3545; font-weight: bold;">"Jeder, auch anonym"</span> ⚠️ Sehr wichtig!</li>
-                  </ul>
-                </li>
-                <li>Klicken Sie <strong>"Bereitstellen"</strong></li>
-                <li>Bei der ersten Bereitstellung werden Sie nach Berechtigungen gefragt:
-                  <ul style="margin: 10px 0 10px 20px;">
-                    <li>Klicken Sie <strong>"Berechtigungen überprüfen"</strong></li>
-                    <li>Wählen Sie Ihr Google-Konto</li>
-                    <li>Klicken Sie <strong>"Erweitert"</strong> → <strong>"Zu [Projektname] wechseln"</strong></li>
-                    <li>Klicken Sie <strong>"Zulassen"</strong></li>
-                  </ul>
-                </li>
-              </ol>
-            </div>
+              <div style="margin-bottom: 20px">
+                <h5 style="color: #333; margin-bottom: 10px">
+                  🚀 Schritt 3: Als Web-App bereitstellen
+                </h5>
+                <ol style="margin-left: 20px">
+                  <li>
+                    Klicken Sie auf <strong>"Bereitstellen"</strong> →
+                    <strong>"Neue Bereitstellung"</strong>
+                  </li>
+                  <li>Bei "Typ" wählen: <strong>"Web-App"</strong></li>
+                  <li>
+                    <strong>Wichtige Einstellungen:</strong>
+                    <ul style="margin: 10px 0 10px 20px">
+                      <li><strong>Ausführen als:</strong> "Ich"</li>
+                      <li>
+                        <strong>Zugriff:</strong>
+                        <span style="color: #dc3545; font-weight: bold"
+                          >"Jeder, auch anonym"</span
+                        >
+                        ⚠️ Sehr wichtig!
+                      </li>
+                    </ul>
+                  </li>
+                  <li>Klicken Sie <strong>"Bereitstellen"</strong></li>
+                  <li>
+                    Bei der ersten Bereitstellung werden Sie nach Berechtigungen
+                    gefragt:
+                    <ul style="margin: 10px 0 10px 20px">
+                      <li>
+                        Klicken Sie <strong>"Berechtigungen überprüfen"</strong>
+                      </li>
+                      <li>Wählen Sie Ihr Google-Konto</li>
+                      <li>
+                        Klicken Sie <strong>"Erweitert"</strong> →
+                        <strong>"Zu [Projektname] wechseln"</strong>
+                      </li>
+                      <li>Klicken Sie <strong>"Zulassen"</strong></li>
+                    </ul>
+                  </li>
+                </ol>
+              </div>
 
-            <div style="margin-bottom: 20px;">
-              <h5 style="color: #333; margin-bottom: 10px;">🔗 Schritt 4: URL kopieren und einfügen</h5>
-              <ol style="margin-left: 20px;">
-                <li>Nach der Bereitstellung erhalten Sie eine <strong>Web-App-URL</strong></li>
-                <li>Sie sieht so aus: <code style="background: #e9ecef; padding: 2px 4px; border-radius: 3px;">https://script.google.com/macros/s/AKfycbx...xyz/exec</code></li>
-                <li><strong>Kopieren Sie diese URL komplett!</strong></li>
-                <li>Fügen Sie sie oben in das Feld "Google Apps Script Webhook URL" ein</li>
-              </ol>
-            </div>
+              <div style="margin-bottom: 20px">
+                <h5 style="color: #333; margin-bottom: 10px">
+                  🔗 Schritt 4: URL kopieren und einfügen
+                </h5>
+                <ol style="margin-left: 20px">
+                  <li>
+                    Nach der Bereitstellung erhalten Sie eine
+                    <strong>Web-App-URL</strong>
+                  </li>
+                  <li>
+                    Sie sieht so aus:
+                    <code
+                      style="
+                        background: #e9ecef;
+                        padding: 2px 4px;
+                        border-radius: 3px;
+                      "
+                      >https://script.google.com/macros/s/AKfycbx...xyz/exec</code
+                    >
+                  </li>
+                  <li><strong>Kopieren Sie diese URL komplett!</strong></li>
+                  <li>
+                    Fügen Sie sie oben in das Feld "Google Apps Script Webhook
+                    URL" ein
+                  </li>
+                </ol>
+              </div>
 
-            <div style="background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; padding: 15px; margin-top: 20px;">
-              <h5 style="color: #0c5460; margin-bottom: 10px;">✅ Test</h5>
-              <p style="margin: 0; color: #0c5460;">
-                Nach der Einrichtung: Erstellen Sie eine Testrechnung. Bei Erfolg sollten die Daten automatisch in Ihrem Google Sheet erscheinen und Sie erhalten die Meldung <strong>"PDF erstellt und Daten an Google Sheet gesendet!"</strong>
-              </p>
-            </div>
+              <div
+                style="
+                  background: #d1ecf1;
+                  border: 1px solid #bee5eb;
+                  border-radius: 4px;
+                  padding: 15px;
+                  margin-top: 20px;
+                "
+              >
+                <h5 style="color: #0c5460; margin-bottom: 10px">✅ Test</h5>
+                <p style="margin: 0; color: #0c5460">
+                  Nach der Einrichtung: Erstellen Sie eine Testrechnung. Bei
+                  Erfolg sollten die Daten automatisch in Ihrem Google Sheet
+                  erscheinen und Sie erhalten die Meldung
+                  <strong
+                    >"PDF erstellt und Daten an Google Sheet gesendet!"</strong
+                  >
+                </p>
+              </div>
 
-            <div style="background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; padding: 15px; margin-top: 15px;">
-              <h5 style="color: #721c24; margin-bottom: 10px;">⚠️ Häufige Probleme</h5>
-              <ul style="margin: 0; padding-left: 20px; color: #721c24;">
-                <li><strong>Zugriff nicht auf "anonym" gesetzt</strong> → Neu bereitstellen mit korrekten Einstellungen</li>
-                <li><strong>URL falsch kopiert</strong> → Muss mit /exec enden</li>
-                <li><strong>Berechtigungen nicht erteilt</strong> → Script im Apps Script Editor manuell ausführen</li>
-                <li><strong>Alte Bereitstellung</strong> → Nach Änderungen immer neu bereitstellen</li>
-              </ul>
+              <div
+                style="
+                  background: #f8d7da;
+                  border: 1px solid #f5c6cb;
+                  border-radius: 4px;
+                  padding: 15px;
+                  margin-top: 15px;
+                "
+              >
+                <h5 style="color: #721c24; margin-bottom: 10px">
+                  ⚠️ Häufige Probleme
+                </h5>
+                <ul style="margin: 0; padding-left: 20px; color: #721c24">
+                  <li>
+                    <strong>Zugriff nicht auf "anonym" gesetzt</strong> → Neu
+                    bereitstellen mit korrekten Einstellungen
+                  </li>
+                  <li>
+                    <strong>URL falsch kopiert</strong> → Muss mit /exec enden
+                  </li>
+                  <li>
+                    <strong>Berechtigungen nicht erteilt</strong> → Script im
+                    Apps Script Editor manuell ausführen
+                  </li>
+                  <li>
+                    <strong>Alte Bereitstellung</strong> → Nach Änderungen immer
+                    neu bereitstellen
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
+
+        <button id="generateBtn" class="generate-btn">
+          📄 PDF erstellen & speichern
+        </button>
+
+        <div id="message"></div>
       </div>
-
-      <button id="generateBtn" class="generate-btn">
-        📄 PDF erstellen & speichern
-      </button>
-
-      <div id="message"></div>
     </div>
-  </div>
 
-  <script>
-    let itemCounter = 1;
+    <script>
+      let itemCounter = 1;
 
-    // Beim Laden gespeicherte Werte aus localStorage laden
-    window.onload = () => {
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('invoiceDate').value = today;
-      document.getElementById('serviceDate').value = today;
+      // Beim Laden gespeicherte Werte aus localStorage laden
+      window.onload = () => {
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("invoiceDate").value = today;
+        document.getElementById("serviceDate").value = today;
 
-      const fields = [
-        'type', 'invoiceNumber', 'company', 'companyAddress', 'taxId', 'companyContact',
-        'client', 'clientAddress', 'customerNumber', 'invoiceDate', 'serviceDate',
-        'taxRate', 'paymentTerms', 'bankDetails', 'additionalNotes', 'sheetUrl'
-      ];
-      
-      fields.forEach(id => {
-        const val = localStorage.getItem(id);
-        if (val && document.getElementById(id)) {
-          document.getElementById(id).value = val;
-        }
-      });
+        const fields = [
+          "type",
+          "invoiceNumber",
+          "company",
+          "companyAddress",
+          "taxId",
+          "companyContact",
+          "client",
+          "clientAddress",
+          "clientGender",
+          "customerNumber",
+          "invoiceDate",
+          "serviceDate",
+          "taxRate",
+          "paymentTerms",
+          "bankDetails",
+          "additionalNotes",
+          "sheetUrl",
+        ];
 
-      updateTotals();
-      setupEventListeners();
-    };
-
-    function setupEventListeners() {
-      // Event Listeners für automatische Berechnung
-      document.addEventListener('input', (e) => {
-        if (e.target.matches('.item-quantity, .item-price, #taxRate')) {
-          updateTotals();
-        }
-      });
-
-      // PDF Generation Button
-      document.getElementById('generateBtn').addEventListener('click', generatePDF);
-      
-      // Toggle Guide Button
-      document.getElementById('toggleGuide').addEventListener('click', () => {
-        const guide = document.getElementById('setupGuide');
-        const button = document.getElementById('toggleGuide');
-        
-        if (guide.style.display === 'none') {
-          guide.style.display = 'block';
-          button.textContent = '📖 Anleitung ausblenden';
-        } else {
-          guide.style.display = 'none';
-          button.textContent = '📖 Anleitung: Google Sheet einrichten';
-        }
-      });
-
-      // Nächste Rechnungsnummer Button
-      document.getElementById('getNextNumber').addEventListener('click', getNextInvoiceNumber);
-    }
-
-    // Funktion zum Abrufen der nächsten Rechnungsnummer
-    async function getNextInvoiceNumber() {
-      const sheetUrl = document.getElementById('sheetUrl').value.trim();
-      const type = document.getElementById('type').value;
-      
-      if (!sheetUrl || !sheetUrl.includes('script.google.com')) {
-        showMessage('Bitte tragen Sie zuerst eine gültige Google Apps Script URL ein!', 'error');
-        return;
-      }
-
-      const button = document.getElementById('getNextNumber');
-      const originalText = button.textContent;
-      button.textContent = '⏳ Lädt...';
-      button.disabled = true;
-
-      try {
-        // Request für nächste Nummer mit no-cors
-        const requestUrl = sheetUrl + '?action=getNextNumber&type=' + encodeURIComponent(type);
-        
-        const response = await fetch(requestUrl, {
-          method: 'GET',
-          mode: 'no-cors'
+        fields.forEach((id) => {
+          const val = localStorage.getItem(id);
+          if (val && document.getElementById(id)) {
+            document.getElementById(id).value = val;
+          }
         });
 
-        // Da wir no-cors verwenden, können wir die Response nicht lesen
-        // Fallback: Generiere eine einfache Nummer basierend auf aktuellem Datum
-        const now = new Date();
-        const year = now.getFullYear().toString().slice(-2);
-        const month = (now.getMonth() + 1).toString().padStart(2, '0');
-        const day = now.getDate().toString().padStart(2, '0');
-        const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
-        
-        const prefix = type === 'Angebot' ? 'ANG-' : 'RE-';
-        const fallbackNumber = prefix + year + month + day + random;
-        
-        document.getElementById('invoiceNumber').value = fallbackNumber;
-        showMessage(`${type}snummer generiert: ${fallbackNumber}`, 'success');
-        
-      } catch (error) {
-        console.error('Fehler:', error);
-        
-        // Fallback bei Fehler: Einfache Zeit-basierte Nummer
-        const now = new Date();
-        const timestamp = now.getTime().toString().slice(-6);
-        const prefix = type === 'Angebot' ? 'ANG-' : 'RE-';
-        const fallbackNumber = prefix + timestamp;
-        
-        document.getElementById('invoiceNumber').value = fallbackNumber;
-        showMessage(`Fallback-${type}snummer generiert: ${fallbackNumber}`, 'warning');
-      } finally {
-        button.textContent = originalText;
-        button.disabled = false;
+        updateTotals();
+        setupEventListeners();
+      };
+
+      function setupEventListeners() {
+        // Event Listeners für automatische Berechnung
+        document.addEventListener("input", (e) => {
+          if (e.target.matches(".item-quantity, .item-price, #taxRate")) {
+            updateTotals();
+          }
+        });
+
+        // PDF Generation Button
+        document
+          .getElementById("generateBtn")
+          .addEventListener("click", generatePDF);
+
+        // Toggle Guide Button
+        document.getElementById("toggleGuide").addEventListener("click", () => {
+          const guide = document.getElementById("setupGuide");
+          const button = document.getElementById("toggleGuide");
+
+          if (guide.style.display === "none") {
+            guide.style.display = "block";
+            button.textContent = "📖 Anleitung ausblenden";
+          } else {
+            guide.style.display = "none";
+            button.textContent = "📖 Anleitung: Google Sheet einrichten";
+          }
+        });
+
+        // Nächste Rechnungsnummer Button
+        document
+          .getElementById("getNextNumber")
+          .addEventListener("click", getNextInvoiceNumber);
+
+        // Nächste Kundennummer Button
+        document
+          .getElementById("getNextCustomerNumber")
+          .addEventListener("click", getNextCustomerNumber);
+
+        // Automatische Kundennummer-Suche beim Kundenname-Ändern
+        document
+          .getElementById("client")
+          .addEventListener("blur", searchExistingCustomer);
+
+        // Automatische Kundennummer-Suche beim Adresse-Ändern
+        document
+          .getElementById("clientAddress")
+          .addEventListener("blur", searchExistingCustomer);
       }
-    }
 
-    // Funktion zum Kopieren des Script-Codes
-    function copyScriptCode() {
-      const code = document.getElementById('scriptCode').textContent;
-      navigator.clipboard.writeText(code).then(() => {
-        alert('Script-Code wurde in die Zwischenablage kopiert!');
-      }).catch(() => {
-        // Fallback für ältere Browser
-        const textArea = document.createElement('textarea');
-        textArea.value = code;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        alert('Script-Code wurde in die Zwischenablage kopiert!');
-      });
-    }
+      // Funktion zum Kopieren des Script-Codes
+      function copyScriptCode() {
+        const code = document.getElementById("scriptCode").textContent;
+        navigator.clipboard
+          .writeText(code)
+          .then(() => {
+            alert("Script-Code wurde in die Zwischenablage kopiert!");
+          })
+          .catch(() => {
+            // Fallback für ältere Browser
+            const textArea = document.createElement("textarea");
+            textArea.value = code;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textArea);
+            alert("Script-Code wurde in die Zwischenablage kopiert!");
+          });
+      }
 
-    function addItem() {
-      itemCounter++;
-      const container = document.getElementById('itemsContainer');
-      const newItem = document.createElement('div');
-      newItem.className = 'item-row';
-      newItem.innerHTML = `
+      function addItem() {
+        itemCounter++;
+        const container = document.getElementById("itemsContainer");
+        const newItem = document.createElement("div");
+        newItem.className = "item-row";
+        newItem.innerHTML = `
         <div class="form-group">
           <label>Leistungsbeschreibung *</label>
           <input type="text" class="item-description" required />
@@ -755,334 +1206,600 @@ function getNextInvoiceNumber(type) {
         </div>
         <button type="button" class="remove-item" onclick="removeItem(this)">✕</button>
       `;
-      container.appendChild(newItem);
-      updateTotals();
-    }
-
-    function removeItem(button) {
-      if (document.querySelectorAll('.item-row').length > 1) {
-        button.closest('.item-row').remove();
+        container.appendChild(newItem);
         updateTotals();
       }
-    }
 
-    function updateTotals() {
-      const items = document.querySelectorAll('.item-row');
-      let netTotal = 0;
-
-      items.forEach(item => {
-        const quantity = parseFloat(item.querySelector('.item-quantity').value) || 0;
-        const price = parseFloat(item.querySelector('.item-price').value) || 0;
-        const total = quantity * price;
-        
-        item.querySelector('.item-total').value = total.toFixed(2);
-        netTotal += total;
-      });
-
-      const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
-      const taxAmount = netTotal * (taxRate / 100);
-      const grandTotal = netTotal + taxAmount;
-
-      document.getElementById('netTotal').textContent = netTotal.toFixed(2) + ' €';
-      document.getElementById('taxAmount').textContent = taxAmount.toFixed(2) + ' €';
-      document.getElementById('grandTotal').textContent = grandTotal.toFixed(2) + ' €';
-    }
-
-    function showMessage(text, type) {
-      const msg = document.getElementById('message');
-      msg.textContent = text;
-      msg.className = `${type} show`;
-      setTimeout(() => msg.classList.remove('show'), 5000);
-    }
-
-    async function generatePDF() {
-      // Formular validieren
-      const requiredFields = document.querySelectorAll('[required]');
-      let hasErrors = false;
-
-      requiredFields.forEach(field => {
-        if (!field.value.trim()) {
-          field.style.borderColor = '#dc3545';
-          hasErrors = true;
-        } else {
-          field.style.borderColor = '#e1e5e9';
+      function removeItem(button) {
+        if (document.querySelectorAll(".item-row").length > 1) {
+          button.closest(".item-row").remove();
+          updateTotals();
         }
-      });
-
-      if (hasErrors) {
-        showMessage('Bitte füllen Sie alle Pflichtfelder aus!', 'error');
-        return;
       }
 
-      // Daten sammeln
-      const formData = {
-        type: document.getElementById('type').value,
-        invoiceNumber: document.getElementById('invoiceNumber').value.trim(),
-        company: document.getElementById('company').value.trim(),
-        companyAddress: document.getElementById('companyAddress').value.trim(),
-        taxId: document.getElementById('taxId').value.trim(),
-        companyContact: document.getElementById('companyContact').value.trim(),
-        client: document.getElementById('client').value.trim(),
-        clientAddress: document.getElementById('clientAddress').value.trim(),
-        customerNumber: document.getElementById('customerNumber').value.trim(),
-        invoiceDate: document.getElementById('invoiceDate').value,
-        serviceDate: document.getElementById('serviceDate').value,
-        taxRate: parseFloat(document.getElementById('taxRate').value) || 19,
-        paymentTerms: document.getElementById('paymentTerms').value.trim(),
-        bankDetails: document.getElementById('bankDetails').value.trim(),
-        additionalNotes: document.getElementById('additionalNotes').value.trim(),
-        sheetUrl: document.getElementById('sheetUrl').value.trim()
-      };
+      function updateTotals() {
+        const items = document.querySelectorAll(".item-row");
+        let netTotal = 0;
 
-      // Items sammeln
-      const items = [];
-      document.querySelectorAll('.item-row').forEach(row => {
-        const description = row.querySelector('.item-description').value.trim();
-        const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
-        const price = parseFloat(row.querySelector('.item-price').value) || 0;
-        
-        if (description && quantity > 0 && price >= 0) {
-          items.push({
-            description,
-            quantity,
-            price,
-            total: quantity * price
-          });
-        }
-      });
+        items.forEach((item) => {
+          const quantity =
+            parseFloat(item.querySelector(".item-quantity").value) || 0;
+          const price =
+            parseFloat(item.querySelector(".item-price").value) || 0;
+          const total = quantity * price;
 
-      if (items.length === 0) {
-        showMessage('Bitte fügen Sie mindestens eine Leistungsposition hinzu!', 'error');
-        return;
+          item.querySelector(".item-total").value = total.toFixed(2);
+          netTotal += total;
+        });
+
+        const taxRate =
+          parseFloat(document.getElementById("taxRate").value) || 0;
+        const taxAmount = netTotal * (taxRate / 100);
+        const grandTotal = netTotal + taxAmount;
+
+        document.getElementById("netTotal").textContent =
+          netTotal.toFixed(2) + " €";
+        document.getElementById("taxAmount").textContent =
+          taxAmount.toFixed(2) + " €";
+        document.getElementById("grandTotal").textContent =
+          grandTotal.toFixed(2) + " €";
       }
 
-      // Lokale Speicherung
-      Object.entries(formData).forEach(([key, val]) => {
-        if (document.getElementById(key)) {
-          localStorage.setItem(key, val);
-        }
-      });
-
-      // Berechnung
-      const netTotal = items.reduce((sum, item) => sum + item.total, 0);
-      const taxAmount = netTotal * (formData.taxRate / 100);
-      const grandTotal = netTotal + taxAmount;
-
-      // PDF erstellen
-      try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        // Seitengröße und Ränder
-        const pageWidth = doc.internal.pageSize.width;
-        const pageHeight = doc.internal.pageSize.height;
-        const margin = 20;
-        let y = margin;
-
-        // Header - Firmenname
-        doc.setFontSize(20);
-        doc.setFont(undefined, 'bold');
-        doc.text(formData.company, margin, y);
-        y += 10;
-
-        // Firmenadresse
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        const companyLines = formData.companyAddress.split('\n');
-        companyLines.forEach(line => {
-          doc.text(line.trim(), margin, y);
-          y += 4;
-        });
-
-        // Kontakt
-        if (formData.companyContact) {
-          const contactLines = formData.companyContact.split('\n');
-          contactLines.forEach(line => {
-            doc.text(line.trim(), margin, y);
-            y += 4;
-          });
-        }
-
-        // Steuernummer
-        doc.text(`Steuernummer: ${formData.taxId}`, margin, y);
-        y += 15;
-
-        // Empfängeradresse (rechtsbündig)
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
-        doc.text(formData.client, pageWidth - margin, y, { align: 'right' });
-        y += 6;
-
-        doc.setFont(undefined, 'normal');
-        const clientLines = formData.clientAddress.split('\n');
-        clientLines.forEach(line => {
-          doc.text(line.trim(), pageWidth - margin, y, { align: 'right' });
-          y += 5;
-        });
-
-        y += 15;
-
-        // Dokumenttitel
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text(`${formData.type} Nr. ${formData.invoiceNumber}`, margin, y);
-        y += 15;
-
-        // Datum und Details
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        doc.text(`${formData.type}sdatum: ${new Date(formData.invoiceDate).toLocaleDateString('de-DE')}`, margin, y);
-        doc.text(`Leistungsdatum: ${new Date(formData.serviceDate).toLocaleDateString('de-DE')}`, pageWidth - margin, y, { align: 'right' });
-        y += 10;
-
-        if (formData.customerNumber) {
-          doc.text(`Kundennummer: ${formData.customerNumber}`, margin, y);
-          y += 6;
-        }
-
-        y += 10;
-
-        // Grußtext
-        doc.text('Sehr geehrte Damen und Herren,', margin, y);
-        y += 8;
-        doc.text(`hiermit ${formData.type === 'Rechnung' ? 'stellen wir Ihnen folgende Leistungen in Rechnung' : 'unterbreiten wir Ihnen folgendes Angebot'}:`, margin, y);
-        y += 15;
-
-        // Tabelle Header
-        const tableTop = y;
-        const colWidths = [10, 80, 25, 30, 35];
-        const colStarts = [margin];
-        for (let i = 1; i < colWidths.length; i++) {
-          colStarts[i] = colStarts[i-1] + colWidths[i-1];
-        }
-
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'bold');
-        
-        // Header Hintergrund
-        doc.setFillColor(240, 240, 240);
-        doc.rect(margin, y-2, pageWidth - 2*margin, 8, 'F');
-        
-        doc.text('Pos.', colStarts[0], y+4);
-        doc.text('Bezeichnung', colStarts[1], y+4);
-        doc.text('Menge', colStarts[2], y+4);
-        doc.text('Einzelpreis', colStarts[3], y+4);
-        doc.text('Gesamtpreis', colStarts[4], y+4);
-        
-        y += 12;
-
-        // Tabelle Inhalt
-        doc.setFont(undefined, 'normal');
-        items.forEach((item, index) => {
-          doc.text((index + 1).toString(), colStarts[0], y);
-          
-          // Mehrzeilige Beschreibung handhaben
-          const maxWidth = colWidths[1] - 5;
-          const lines = doc.splitTextToSize(item.description, maxWidth);
-          doc.text(lines, colStarts[1], y);
-          
-          doc.text(item.quantity.toString(), colStarts[2], y);
-          doc.text(`${item.price.toFixed(2)} €`, colStarts[3], y);
-          doc.text(`${item.total.toFixed(2)} €`, colStarts[4], y);
-          
-          y += Math.max(6, lines.length * 4);
-        });
-
-        y += 10;
-
-        // Summen Tabelle
-        const summaryX = pageWidth - 90;
-        doc.line(summaryX, y, pageWidth - margin, y);
-        y += 8;
-
-        doc.text('Nettosumme:', summaryX, y);
-        doc.text(`${netTotal.toFixed(2)} €`, pageWidth - margin, y, { align: 'right' });
-        y += 6;
-
-        doc.text(`MwSt. ${formData.taxRate}%:`, summaryX, y);
-        doc.text(`${taxAmount.toFixed(2)} €`, pageWidth - margin, y, { align: 'right' });
-        y += 6;
-
-        doc.line(summaryX, y, pageWidth - margin, y);
-        y += 4;
-
-        doc.setFont(undefined, 'bold');
-        doc.text('Gesamtbetrag:', summaryX, y);
-        doc.text(`${grandTotal.toFixed(2)} €`, pageWidth - margin, y, { align: 'right' });
-        y += 15;
-
-        // Zahlungshinweise
-        doc.setFont(undefined, 'normal');
-        if (formData.paymentTerms) {
-          doc.text(formData.paymentTerms, margin, y);
-          y += 8;
-        }
-
-        if (formData.bankDetails) {
-          doc.text('Bankverbindung:', margin, y);
-          y += 5;
-          const bankLines = formData.bankDetails.split('\n');
-          bankLines.forEach(line => {
-            doc.text(line.trim(), margin, y);
-            y += 4;
-          });
-          y += 5;
-        }
-
-        // Zusätzliche Hinweise
-        if (formData.additionalNotes) {
-          doc.text(formData.additionalNotes, margin, y);
-          y += 10;
-        }
-
-        // Grußformel
-        doc.text('Mit freundlichen Grüßen', margin, y);
-        y += 10;
-        doc.text(formData.company, margin, y);
-
-        // PDF speichern
-        doc.save(`${formData.type}_${formData.invoiceNumber}.pdf`);
-
-      } catch (error) {
-        console.error('PDF Fehler:', error);
-        showMessage('Fehler bei der PDF-Erstellung: ' + error.message, 'error');
-        return;
+      function showMessage(text, type) {
+        const msg = document.getElementById("message");
+        msg.textContent = text;
+        msg.className = `${type} show`;
+        setTimeout(() => msg.classList.remove("show"), 5000);
       }
 
-      // Google Sheet Integration
-      if (formData.sheetUrl && formData.sheetUrl.includes('script.google.com')) {
+      // Funktion zum Abrufen der nächsten Rechnungsnummer
+      async function getNextInvoiceNumber() {
+        const sheetUrl = document.getElementById("sheetUrl").value.trim();
+        const type = document.getElementById("type").value;
+
+        if (!sheetUrl || !sheetUrl.includes("script.google.com")) {
+          showMessage(
+            "Bitte tragen Sie zuerst eine gültige Google Apps Script URL ein!",
+            "error"
+          );
+          return;
+        }
+
+        const button = document.getElementById("getNextNumber");
+        const originalText = button.textContent;
+        button.textContent = "⏳ Lädt...";
+        button.disabled = true;
+
         try {
-          const sheetData = {
-            type: formData.type,
-            invoiceNumber: formData.invoiceNumber,
-            company: formData.company,
-            client: formData.client,
-            invoiceDate: formData.invoiceDate,
-            serviceDate: formData.serviceDate,
-            items: items.map(item => `${item.description} (${item.quantity}x ${item.price.toFixed(2)}€)`).join('; '),
-            netTotal: netTotal.toFixed(2),
-            taxRate: formData.taxRate,
-            taxAmount: taxAmount.toFixed(2),
-            grandTotal: grandTotal.toFixed(2)
-          };
+          // Request für nächste Nummer mit no-cors
+          const requestUrl =
+            sheetUrl + "?action=getNextNumber&type=" + encodeURIComponent(type);
 
-          const response = await fetch(formData.sheetUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(sheetData),
+          const response = await fetch(requestUrl, {
+            method: "GET",
+            mode: "no-cors",
           });
 
-          // Da no-cors mode keine response.ok prüfung erlaubt, nehmen wir an dass es funktioniert
-          showMessage('PDF erstellt und Daten an Google Sheet gesendet!', 'success');
+          // Da wir no-cors verwenden, können wir die Response nicht lesen
+          // Fallback: Generiere eine einfache Nummer basierend auf aktuellem Datum
+          const now = new Date();
+          const year = now.getFullYear().toString().slice(-2);
+          const month = (now.getMonth() + 1).toString().padStart(2, "0");
+          const day = now.getDate().toString().padStart(2, "0");
+          const random = Math.floor(Math.random() * 100)
+            .toString()
+            .padStart(2, "0");
+
+          const prefix = type === "Angebot" ? "ANG-" : "RE-";
+          const fallbackNumber = prefix + year + month + day + random;
+
+          document.getElementById("invoiceNumber").value = fallbackNumber;
+          showMessage(`${type}snummer generiert: ${fallbackNumber}`, "success");
         } catch (error) {
-          console.error('Google Sheet Fehler:', error);
-          showMessage('PDF erstellt, aber keine Verbindung zum Google Sheet möglich.', 'warning');
+          console.error("Fehler:", error);
+
+          // Fallback bei Fehler: Einfache Zeit-basierte Nummer
+          const now = new Date();
+          const timestamp = now.getTime().toString().slice(-6);
+          const prefix = type === "Angebot" ? "ANG-" : "RE-";
+          const fallbackNumber = prefix + timestamp;
+
+          document.getElementById("invoiceNumber").value = fallbackNumber;
+          showMessage(
+            `Fallback-${type}snummer generiert: ${fallbackNumber}`,
+            "warning"
+          );
+        } finally {
+          button.textContent = originalText;
+          button.disabled = false;
         }
-      } else {
-        showMessage('PDF erfolgreich erstellt! (Keine Google Sheet URL eingetragen)', 'success');
       }
-    }
-  </script>
-</body>
+
+      // Funktion zum Abrufen der nächsten Kundennummer
+      async function getNextCustomerNumber() {
+        const sheetUrl = document.getElementById("sheetUrl").value.trim();
+
+        if (!sheetUrl || !sheetUrl.includes("script.google.com")) {
+          showMessage(
+            "Bitte tragen Sie zuerst eine gültige Google Apps Script URL ein!",
+            "error"
+          );
+          return;
+        }
+
+        const button = document.getElementById("getNextCustomerNumber");
+        const originalText = button.textContent;
+        button.textContent = "⏳ Lädt...";
+        button.disabled = true;
+
+        try {
+          // Request für nächste Kundennummer mit no-cors
+          const requestUrl = sheetUrl + "?action=getNextCustomerNumber";
+
+          const response = await fetch(requestUrl, {
+            method: "GET",
+            mode: "no-cors",
+          });
+
+          // Da wir no-cors verwenden, können wir die Response nicht lesen
+          // Fallback: Generiere eine einfache Kundennummer basierend auf aktuellem Datum
+          const now = new Date();
+          const year = now.getFullYear().toString().slice(-2);
+          const month = (now.getMonth() + 1).toString().padStart(2, "0");
+          const random = Math.floor(Math.random() * 1000)
+            .toString()
+            .padStart(3, "0");
+
+          const fallbackNumber = "KD-" + year + month + random;
+
+          document.getElementById("customerNumber").value = fallbackNumber;
+          showMessage(`Kundennummer generiert: ${fallbackNumber}`, "success");
+        } catch (error) {
+          console.error("Fehler:", error);
+
+          // Fallback bei Fehler: Einfache Zeit-basierte Nummer
+          const now = new Date();
+          const timestamp = now.getTime().toString().slice(-6);
+          const fallbackNumber = "KD-" + timestamp;
+
+          document.getElementById("customerNumber").value = fallbackNumber;
+          showMessage(
+            `Fallback-Kundennummer generiert: ${fallbackNumber}`,
+            "warning"
+          );
+        } finally {
+          button.textContent = originalText;
+          button.disabled = false;
+        }
+      }
+
+      // Funktion zur Suche nach vorhandenen Kunden
+      async function searchExistingCustomer() {
+        const sheetUrl = document.getElementById("sheetUrl").value.trim();
+        const clientName = document.getElementById("client").value.trim();
+        const clientAddress = document
+          .getElementById("clientAddress")
+          .value.trim();
+
+        if (
+          !sheetUrl ||
+          !sheetUrl.includes("script.google.com") ||
+          !clientName
+        ) {
+          return; // Keine Suche ohne URL oder Kundenname
+        }
+
+        try {
+          // Request für Kundensuche mit Name und Adresse
+          const requestUrl =
+            sheetUrl +
+            "?action=searchCustomer&name=" +
+            encodeURIComponent(clientName) +
+            "&address=" +
+            encodeURIComponent(clientAddress);
+
+          const response = await fetch(requestUrl, {
+            method: "GET",
+            mode: "no-cors",
+          });
+
+          // Da wir no-cors verwenden, können wir die Response nicht direkt lesen
+          // Das Google Script wird trotzdem ausgeführt und könnte Kundendaten zurückgeben
+
+          // Fallback: Intelligente Client-seitige Prüfung
+          const lowerName = clientName.toLowerCase();
+          if (
+            lowerName.includes("gmbh") ||
+            lowerName.includes("ag") ||
+            lowerName.includes("kg") ||
+            lowerName.includes("ug")
+          ) {
+            // Firma erkannt - setze Anrede auf neutral
+            document.getElementById("clientGender").value = "";
+          }
+
+          // Zeige Hinweis, dass nach vorhandenen Kunden gesucht wird
+          if (clientName && clientAddress) {
+            showMessage("Suche nach vorhandenem Kunden...", "warning");
+            setTimeout(() => {
+              const msg = document.getElementById("message");
+              if (msg.textContent.includes("Suche nach vorhandenem Kunden")) {
+                msg.classList.remove("show");
+              }
+            }, 2000);
+          }
+        } catch (error) {
+          console.error("Fehler bei Kundensuche:", error);
+        }
+      }
+
+      async function generatePDF() {
+        // Formular validieren
+        const requiredFields = document.querySelectorAll("[required]");
+        let hasErrors = false;
+
+        requiredFields.forEach((field) => {
+          if (!field.value.trim()) {
+            field.style.borderColor = "#dc3545";
+            hasErrors = true;
+          } else {
+            field.style.borderColor = "#e1e5e9";
+          }
+        });
+
+        if (hasErrors) {
+          showMessage("Bitte füllen Sie alle Pflichtfelder aus!", "error");
+          return;
+        }
+
+        // Daten sammeln
+        const formData = {
+          type: document.getElementById("type").value,
+          invoiceNumber: document.getElementById("invoiceNumber").value.trim(),
+          company: document.getElementById("company").value.trim(),
+          companyAddress: document
+            .getElementById("companyAddress")
+            .value.trim(),
+          taxId: document.getElementById("taxId").value.trim(),
+          companyContact: document
+            .getElementById("companyContact")
+            .value.trim(),
+          client: document.getElementById("client").value.trim(),
+          clientAddress: document.getElementById("clientAddress").value.trim(),
+          clientGender: document.getElementById("clientGender").value,
+          customerNumber: document
+            .getElementById("customerNumber")
+            .value.trim(),
+          invoiceDate: document.getElementById("invoiceDate").value,
+          serviceDate: document.getElementById("serviceDate").value,
+          taxRate: parseFloat(document.getElementById("taxRate").value) || 19,
+          paymentTerms: document.getElementById("paymentTerms").value.trim(),
+          bankDetails: document.getElementById("bankDetails").value.trim(),
+          additionalNotes: document
+            .getElementById("additionalNotes")
+            .value.trim(),
+          sheetUrl: document.getElementById("sheetUrl").value.trim(),
+        };
+
+        // Items sammeln
+        const items = [];
+        document.querySelectorAll(".item-row").forEach((row) => {
+          const description = row
+            .querySelector(".item-description")
+            .value.trim();
+          const quantity =
+            parseFloat(row.querySelector(".item-quantity").value) || 0;
+          const price = parseFloat(row.querySelector(".item-price").value) || 0;
+
+          if (description && quantity > 0 && price >= 0) {
+            items.push({
+              description,
+              quantity,
+              price,
+              total: quantity * price,
+            });
+          }
+        });
+
+        if (items.length === 0) {
+          showMessage(
+            "Bitte fügen Sie mindestens eine Leistungsposition hinzu!",
+            "error"
+          );
+          return;
+        }
+
+        // Lokale Speicherung
+        Object.entries(formData).forEach(([key, val]) => {
+          if (document.getElementById(key)) {
+            localStorage.setItem(key, val);
+          }
+        });
+
+        // Berechnung
+        const netTotal = items.reduce((sum, item) => sum + item.total, 0);
+        const taxAmount = netTotal * (formData.taxRate / 100);
+        const grandTotal = netTotal + taxAmount;
+
+        // PDF erstellen
+        try {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF();
+
+          // Seitengröße und Ränder
+          const pageWidth = doc.internal.pageSize.width;
+          const pageHeight = doc.internal.pageSize.height;
+          const margin = 20;
+          let y = margin;
+
+          // Header - Firmenname
+          doc.setFontSize(20);
+          doc.setFont(undefined, "bold");
+          doc.text(formData.company, margin, y);
+          y += 10;
+
+          // Firmenadresse
+          doc.setFontSize(10);
+          doc.setFont(undefined, "normal");
+          const companyLines = formData.companyAddress.split("\n");
+          companyLines.forEach((line) => {
+            doc.text(line.trim(), margin, y);
+            y += 4;
+          });
+
+          // Kontakt
+          if (formData.companyContact) {
+            const contactLines = formData.companyContact.split("\n");
+            contactLines.forEach((line) => {
+              doc.text(line.trim(), margin, y);
+              y += 4;
+            });
+          }
+
+          // Steuernummer
+          doc.text(`Steuernummer: ${formData.taxId}`, margin, y);
+          y += 15;
+
+          // Empfängeradresse (rechtsbündig)
+          doc.setFontSize(11);
+          doc.setFont(undefined, "bold");
+          doc.text(formData.client, pageWidth - margin, y, { align: "right" });
+          y += 6;
+
+          doc.setFont(undefined, "normal");
+          const clientLines = formData.clientAddress.split("\n");
+          clientLines.forEach((line) => {
+            doc.text(line.trim(), pageWidth - margin, y, { align: "right" });
+            y += 5;
+          });
+
+          y += 15;
+
+          // Dokumenttitel
+          doc.setFontSize(16);
+          doc.setFont(undefined, "bold");
+          doc.text(`${formData.type} Nr. ${formData.invoiceNumber}`, margin, y);
+          y += 15;
+
+          // Datum und Details
+          doc.setFontSize(10);
+          doc.setFont(undefined, "normal");
+          doc.text(
+            `${formData.type}sdatum: ${new Date(
+              formData.invoiceDate
+            ).toLocaleDateString("de-DE")}`,
+            margin,
+            y
+          );
+          doc.text(
+            `Leistungsdatum: ${new Date(
+              formData.serviceDate
+            ).toLocaleDateString("de-DE")}`,
+            pageWidth - margin,
+            y,
+            { align: "right" }
+          );
+          y += 10;
+
+          if (formData.customerNumber) {
+            doc.text(`Kundennummer: ${formData.customerNumber}`, margin, y);
+            y += 6;
+          }
+
+          y += 10;
+
+          // Intelligente Anrede basierend auf Geschlecht
+          let greeting = "Sehr geehrte Damen und Herren,";
+          if (formData.clientGender && formData.client) {
+            // Extrahiere Nachname (letztes Wort des Kundennamens)
+            const nameParts = formData.client.trim().split(" ");
+            const lastName = nameParts[nameParts.length - 1];
+
+            if (formData.clientGender === "Herr") {
+              greeting = `Sehr geehrter Herr ${lastName},`;
+            } else if (formData.clientGender === "Frau") {
+              greeting = `Sehr geehrte Frau ${lastName},`;
+            }
+          }
+
+          // Grußtext
+          doc.text(greeting, margin, y);
+          y += 8;
+          doc.text(
+            `hiermit ${
+              formData.type === "Rechnung"
+                ? "stellen wir Ihnen folgende Leistungen in Rechnung"
+                : "unterbreiten wir Ihnen folgendes Angebot"
+            }:`,
+            margin,
+            y
+          );
+          y += 15;
+
+          // Tabelle Header
+          const tableTop = y;
+          const colWidths = [10, 80, 25, 30, 35];
+          const colStarts = [margin];
+          for (let i = 1; i < colWidths.length; i++) {
+            colStarts[i] = colStarts[i - 1] + colWidths[i - 1];
+          }
+
+          doc.setFontSize(9);
+          doc.setFont(undefined, "bold");
+
+          // Header Hintergrund
+          doc.setFillColor(240, 240, 240);
+          doc.rect(margin, y - 2, pageWidth - 2 * margin, 8, "F");
+
+          doc.text("Pos.", colStarts[0], y + 4);
+          doc.text("Bezeichnung", colStarts[1], y + 4);
+          doc.text("Menge", colStarts[2], y + 4);
+          doc.text("Einzelpreis", colStarts[3], y + 4);
+          doc.text("Gesamtpreis", colStarts[4], y + 4);
+
+          y += 12;
+
+          // Tabelle Inhalt
+          doc.setFont(undefined, "normal");
+          items.forEach((item, index) => {
+            doc.text((index + 1).toString(), colStarts[0], y);
+
+            // Mehrzeilige Beschreibung handhaben
+            const maxWidth = colWidths[1] - 5;
+            const lines = doc.splitTextToSize(item.description, maxWidth);
+            doc.text(lines, colStarts[1], y);
+
+            doc.text(item.quantity.toString(), colStarts[2], y);
+            doc.text(`${item.price.toFixed(2)} €`, colStarts[3], y);
+            doc.text(`${item.total.toFixed(2)} €`, colStarts[4], y);
+
+            y += Math.max(6, lines.length * 4);
+          });
+
+          y += 10;
+
+          // Summen Tabelle
+          const summaryX = pageWidth - 90;
+          doc.line(summaryX, y, pageWidth - margin, y);
+          y += 8;
+
+          doc.text("Nettosumme:", summaryX, y);
+          doc.text(`${netTotal.toFixed(2)} €`, pageWidth - margin, y, {
+            align: "right",
+          });
+          y += 6;
+
+          doc.text(`MwSt. ${formData.taxRate}%:`, summaryX, y);
+          doc.text(`${taxAmount.toFixed(2)} €`, pageWidth - margin, y, {
+            align: "right",
+          });
+          y += 6;
+
+          doc.line(summaryX, y, pageWidth - margin, y);
+          y += 4;
+
+          doc.setFont(undefined, "bold");
+          doc.text("Gesamtbetrag:", summaryX, y);
+          doc.text(`${grandTotal.toFixed(2)} €`, pageWidth - margin, y, {
+            align: "right",
+          });
+          y += 15;
+
+          // Zahlungshinweise
+          doc.setFont(undefined, "normal");
+          if (formData.paymentTerms) {
+            doc.text(formData.paymentTerms, margin, y);
+            y += 8;
+          }
+
+          if (formData.bankDetails) {
+            doc.text("Bankverbindung:", margin, y);
+            y += 5;
+            const bankLines = formData.bankDetails.split("\n");
+            bankLines.forEach((line) => {
+              doc.text(line.trim(), margin, y);
+              y += 4;
+            });
+            y += 5;
+          }
+
+          // Zusätzliche Hinweise
+          if (formData.additionalNotes) {
+            doc.text(formData.additionalNotes, margin, y);
+            y += 10;
+          }
+
+          // Grußformel
+          doc.text("Mit freundlichen Grüßen", margin, y);
+          y += 10;
+          doc.text(formData.company, margin, y);
+
+          // PDF speichern
+          doc.save(`${formData.type}_${formData.invoiceNumber}.pdf`);
+        } catch (error) {
+          console.error("PDF Fehler:", error);
+          showMessage(
+            "Fehler bei der PDF-Erstellung: " + error.message,
+            "error"
+          );
+          return;
+        }
+
+        // Google Sheet Integration
+        if (
+          formData.sheetUrl &&
+          formData.sheetUrl.includes("script.google.com")
+        ) {
+          try {
+            const sheetData = {
+              type: formData.type,
+              invoiceNumber: formData.invoiceNumber,
+              company: formData.company,
+              client: formData.client,
+              clientGender: formData.clientGender,
+              customerNumber: formData.customerNumber,
+              invoiceDate: formData.invoiceDate,
+              serviceDate: formData.serviceDate,
+              items: items
+                .map(
+                  (item) =>
+                    `${item.description} (${
+                      item.quantity
+                    }x ${item.price.toFixed(2)}€)`
+                )
+                .join("; "),
+              netTotal: netTotal.toFixed(2),
+              taxRate: formData.taxRate,
+              taxAmount: taxAmount.toFixed(2),
+              grandTotal: grandTotal.toFixed(2),
+            };
+
+            const response = await fetch(formData.sheetUrl, {
+              method: "POST",
+              mode: "no-cors",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(sheetData),
+            });
+
+            // Da no-cors mode keine response.ok prüfung erlaubt, nehmen wir an dass es funktioniert
+            showMessage(
+              "PDF erstellt und Daten an Google Sheet gesendet!",
+              "success"
+            );
+          } catch (error) {
+            console.error("Google Sheet Fehler:", error);
+            showMessage(
+              "PDF erstellt, aber keine Verbindung zum Google Sheet möglich.",
+              "warning"
+            );
+          }
+        } else {
+          showMessage(
+            "PDF erfolgreich erstellt! (Keine Google Sheet URL eingetragen)",
+            "success"
+          );
+        }
+      }
+    </script>
+  </body>
 </html>

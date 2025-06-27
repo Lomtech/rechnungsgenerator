@@ -1737,7 +1737,7 @@ function getNextCustomerNumber() {
           // PDF speichern
           doc.save(`${formData.type}_${formData.invoiceNumber}.pdf`);
         } catch (error) {
-          console.error("PDF Fehler:", error);
+          console.error("PDF-Fehler:", error);
           showMessage(
             "Fehler bei der PDF-Erstellung: " + error.message,
             "error"

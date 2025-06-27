@@ -726,7 +726,6 @@
                     "
                   >
 function doGet(e) {
-  // Prüfen ob e und parameter existieren
   if (e && e.parameter) {
     if (e.parameter.action === 'getNextNumber') {
       return getNextInvoiceNumber(e.parameter.type);
@@ -738,134 +737,59 @@ function doGet(e) {
       return searchExistingCustomer(e.parameter.name);
     }
   }
-  
   return ContentService.createTextOutput("Script läuft!");
 }
 
 function doPost(e) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  
   try {
     var data = JSON.parse(e.postData.contents);
-    
     sheet.appendRow([
-      data.type || "",                    // A: Typ
-      data.invoiceNumber || "",           // B: Rechnungsnummer  
-      data.company || "",                 // C: Firma
-      data.client || "",                  // D: Kunde
-      data.clientGender || "",            // E: Anrede
-      data.customerNumber || "",          // F: Kundennummer
-      data.invoiceDate || "",             // G: Rechnungsdatum
-      data.serviceDate || "",             // H: Leistungsdatum
-      data.items || "",                   // I: Position
-      data.netTotal || "",                // J: Nettosumme
-      data.taxRate + "%" || "",           // K: MwSt-Satz
-      data.taxAmount || "",               // L: MwSt-Betrag
-      data.grandTotal || ""               // M: Gesamtbetrag
+      data.type || "",
+      data.invoiceNumber || "",
+      data.company || "",
+      data.client || "",
+      data.clientGender || "",
+      data.customerNumber || "",
+      data.invoiceDate || "",
+      data.serviceDate || "",
+      data.items || "",
+      data.netTotal || "",
+      data.taxRate + "%" || "",
+      data.taxAmount || "",
+      data.grandTotal || ""
     ]);
-    
   } catch (error) {
     sheet.appendRow(["FEHLER", error.toString()]);
   }
-  
   return ContentService.createTextOutput("Daten gespeichert");
 }
 
-function searchExistingCustomer(customerName, customerAddress) {
+function searchExistingCustomer(customerName) {
   try {
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var data = sheet.getDataRange().getValues();
-    
-    // Normalisiere Suchkriterien
     var searchName = customerName.toLowerCase().replace(/\s+/g, '');
-    var searchAddress = customerAddress ? customerAddress.toLowerCase().replace(/\s+/g, '') : '';
     
-    var bestMatch = null;
-    var bestScore = 0;
-    
-    // Durchsuche alle Zeilen nach dem Kundennamen und Adresse
     for (var i = 1; i < data.length; i++) {
-      var existingClient = data[i][3]; // Spalte D (Kunde)
-      var existingGender = data[i][4]; // Spalte E (Anrede)
-      var existingCustomerNumber = data[i][5]; // Spalte F (Kundennummer)
-      var existingAddress = data[i][7] || ''; // Spalte H (Adresse) - falls verfügbar
+      var existingClient = data[i][3];
+      var existingGender = data[i][4];
+      var existingCustomerNumber = data[i][5];
       
       if (existingClient && typeof existingClient === 'string') {
         var existingName = existingClient.toLowerCase().replace(/\s+/g, '');
-        var existingAddr = existingAddress.toString().toLowerCase().replace(/\s+/g, '');
-        
-        var score = 0;
-        
-        // Name-Matching (Hauptkriterium)
-        if (existingName === searchName) {
-          score += 100; // Exakte Übereinstimmung
-        } else if (existingName.includes(searchName) || searchName.includes(existingName)) {
-          score += 60; // Teilweise Übereinstimmung
-        } else {
-          // Prüfe einzelne Wörter
-          var nameWords = searchName.split(/[^a-z0-9]/);
-          var existingWords = existingName.split(/[^a-z0-9]/);
-          var matchingWords = 0;
-          
-          nameWords.forEach(function(word) {
-            if (word.length > 2 && existingWords.some(function(eWord) { return eWord.includes(word); })) {
-              matchingWords++;
+        if (existingName === searchName || existingName.includes(searchName) || searchName.includes(existingName)) {
+          if (existingCustomerNumber) {
+            var result = existingCustomerNumber;
+            if (existingGender) {
+              result += "|" + existingGender;
             }
-          });
-          
-          if (matchingWords >= 2) {
-            score += 40; // Mehrere Wörter stimmen überein
-          } else if (matchingWords >= 1) {
-            score += 20; // Ein Wort stimmt überein
+            return ContentService.createTextOutput(result);
           }
-        }
-        
-        // Adress-Matching (zusätzliches Kriterium)
-        if (searchAddress && existingAddr) {
-          if (existingAddr.includes(searchAddress) || searchAddress.includes(existingAddr)) {
-            score += 30; // Adresse stimmt überein
-          } else {
-            // Prüfe Straßenname oder PLZ
-            var addressParts = searchAddress.split(/[^a-z0-9]/);
-            var existingParts = existingAddr.split(/[^a-z0-9]/);
-            var addressMatches = 0;
-            
-            addressParts.forEach(function(part) {
-              if (part.length > 2 && existingParts.some(function(ePart) { return ePart.includes(part); })) {
-                addressMatches++;
-              }
-            });
-            
-            if (addressMatches >= 1) {
-              score += 15; // Teilweise Adress-Übereinstimmung
-            }
-          }
-        }
-        
-        // Speichere den besten Match
-        if (score > bestScore && score >= 60 && existingCustomerNumber) { // Mindest-Score für Match
-          bestScore = score;
-          bestMatch = {
-            customerNumber: existingCustomerNumber,
-            gender: existingGender || '',
-            score: score
-          };
         }
       }
     }
-    
-    // Gib den besten Match zurück
-    if (bestMatch) {
-      var result = bestMatch.customerNumber;
-      if (bestMatch.gender) {
-        result += "|" + bestMatch.gender;
-      }
-      result += "|SCORE:" + bestMatch.score; // Für Debugging
-      return ContentService.createTextOutput(result);
-    }
-    
     return ContentService.createTextOutput("NICHT_GEFUNDEN");
-    
   } catch (error) {
     return ContentService.createTextOutput("FEHLER: " + error.toString());
   }
@@ -875,16 +799,13 @@ function getNextInvoiceNumber(type) {
   try {
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var data = sheet.getDataRange().getValues();
-    
     var maxNumber = 0;
     var prefix = type === 'Angebot' ? 'ANG-' : 'RE-';
     
     for (var i = 1; i < data.length; i++) {
-      var invoiceNumber = data[i][1]; // Spalte B (Rechnungsnummer)
-      
+      var invoiceNumber = data[i][1];
       if (invoiceNumber && typeof invoiceNumber === 'string') {
         var numberPart = invoiceNumber.replace(prefix, '').replace(/[^0-9]/g, '');
-        
         if (numberPart) {
           var num = parseInt(numberPart);
           if (!isNaN(num) && num > maxNumber) {
@@ -897,9 +818,7 @@ function getNextInvoiceNumber(type) {
     var nextNumber = maxNumber + 1;
     var paddedNumber = nextNumber.toString().padStart(4, '0');
     var result = prefix + paddedNumber;
-    
     return ContentService.createTextOutput(result);
-    
   } catch (error) {
     return ContentService.createTextOutput("FEHLER: " + error.toString());
   }
@@ -909,16 +828,13 @@ function getNextCustomerNumber() {
   try {
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var data = sheet.getDataRange().getValues();
-    
     var maxNumber = 0;
     var prefix = 'KD-';
     
     for (var i = 1; i < data.length; i++) {
-      var customerNumber = data[i][5]; // Spalte F (Kundennummer)
-      
+      var customerNumber = data[i][5];
       if (customerNumber && typeof customerNumber === 'string' && customerNumber.includes('KD-')) {
         var numberPart = customerNumber.replace(prefix, '').replace(/[^0-9]/g, '');
-        
         if (numberPart) {
           var num = parseInt(numberPart);
           if (!isNaN(num) && num > maxNumber) {
@@ -931,9 +847,7 @@ function getNextCustomerNumber() {
     var nextNumber = maxNumber + 1;
     var paddedNumber = nextNumber.toString().padStart(4, '0');
     var result = prefix + paddedNumber;
-    
     return ContentService.createTextOutput(result);
-    
   } catch (error) {
     return ContentService.createTextOutput("FEHLER: " + error.toString());
   }
@@ -1155,11 +1069,6 @@ function getNextCustomerNumber() {
         document
           .getElementById("client")
           .addEventListener("blur", searchExistingCustomer);
-
-        // Automatische Kundennummer-Suche beim Adresse-Ändern
-        document
-          .getElementById("clientAddress")
-          .addEventListener("blur", searchExistingCustomer);
       }
 
       // Funktion zum Kopieren des Script-Codes
@@ -1377,9 +1286,6 @@ function getNextCustomerNumber() {
       async function searchExistingCustomer() {
         const sheetUrl = document.getElementById("sheetUrl").value.trim();
         const clientName = document.getElementById("client").value.trim();
-        const clientAddress = document
-          .getElementById("clientAddress")
-          .value.trim();
 
         if (
           !sheetUrl ||
@@ -1390,13 +1296,11 @@ function getNextCustomerNumber() {
         }
 
         try {
-          // Request für Kundensuche mit Name und Adresse
+          // Request für Kundensuche
           const requestUrl =
             sheetUrl +
             "?action=searchCustomer&name=" +
-            encodeURIComponent(clientName) +
-            "&address=" +
-            encodeURIComponent(clientAddress);
+            encodeURIComponent(clientName);
 
           const response = await fetch(requestUrl, {
             method: "GET",
@@ -1404,9 +1308,10 @@ function getNextCustomerNumber() {
           });
 
           // Da wir no-cors verwenden, können wir die Response nicht direkt lesen
-          // Das Google Script wird trotzdem ausgeführt und könnte Kundendaten zurückgeben
+          // Das Google Script wird trotzdem ausgeführt und könnte eine Kundennummer zurückgeben
+          // Hier implementieren wir einen einfachen Fallback
 
-          // Fallback: Intelligente Client-seitige Prüfung
+          // Fallback: Prüfe ob der Kundenname Hinweise auf Geschlecht enthält
           const lowerName = clientName.toLowerCase();
           if (
             lowerName.includes("gmbh") ||
@@ -1414,19 +1319,11 @@ function getNextCustomerNumber() {
             lowerName.includes("kg") ||
             lowerName.includes("ug")
           ) {
-            // Firma erkannt - setze Anrede auf neutral
+            // Firma erkannt
             document.getElementById("clientGender").value = "";
-          }
-
-          // Zeige Hinweis, dass nach vorhandenen Kunden gesucht wird
-          if (clientName && clientAddress) {
-            showMessage("Suche nach vorhandenem Kunden...", "warning");
-            setTimeout(() => {
-              const msg = document.getElementById("message");
-              if (msg.textContent.includes("Suche nach vorhandenem Kunden")) {
-                msg.classList.remove("show");
-              }
-            }, 2000);
+          } else {
+            // Mögliche Privatperson - keine automatische Geschlechts-Erkennung
+            // Benutzer muss manuell auswählen
           }
         } catch (error) {
           console.error("Fehler bei Kundensuche:", error);
@@ -1737,7 +1634,7 @@ function getNextCustomerNumber() {
           // PDF speichern
           doc.save(`${formData.type}_${formData.invoiceNumber}.pdf`);
         } catch (error) {
-          console.error("PDF-Fehler:", error);
+          console.error("PDF Fehler:", error);
           showMessage(
             "Fehler bei der PDF-Erstellung: " + error.message,
             "error"
